@@ -1,4 +1,4 @@
-env_id: 2DBpp-v4
+env_id: 2DBpp-v3
 n_envs: 4
 train_seed: 0
 eval_seed: 10
@@ -19,15 +19,15 @@ monitor_kwargs:
   - PE
 policy_kwargs: &id001
   normalize_images: false
-  network: TransfromerNetwork4
+  network: TransfromerNetwork3
   network_kwargs:
     hidden_dim: 1600
     position_encode: true
     use_pad_mask: false
     transformer_kwargs:
-      d_model: 128
+      d_model: 64
       nhead: 4
-      dim_feedforward: 512
+      dim_feedforward: 256
       dropout: 0.0
       batch_first: true
       norm_first: false
@@ -63,5 +63,5 @@ PPO_kwargs:
   mask_coef: 0.5
   add_entropy_loss: true
   ent_coef: 0.01
-  add_invalid_probs: false
+  add_invalid_probs: true
   invalid_probs_coef: 0.01
