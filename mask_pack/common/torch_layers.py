@@ -569,16 +569,16 @@ class TransfromerNetwork4(BaseNetwork):
         self.transformer = nn.Transformer(**transformer_kwargs)
 
         self.mask_net = nn.Sequential(
-            nn.Linear(transformer_kwargs["d_model"], self.action_dim),
+            nn.Linear(self.action_dim, self.action_dim),
             nn.Sigmoid(),
         )
 
         self.actor_net = nn.Sequential(
-            nn.Linear(transformer_kwargs["d_model"], self.action_dim),
+            nn.Linear(self.action_dim, self.action_dim),
         )
 
         self.critic_net = nn.Sequential(
-            nn.Linear(transformer_kwargs["d_model"], 1),
+            nn.Linear(self.action_dim, 1),
         )
         
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor):
@@ -605,8 +605,8 @@ class TransfromerNetwork4(BaseNetwork):
             src_key_padding_mask=src_key_padding_mask if self.use_pad_mask else None
         )   # torch.Size([N, W*H, d_model])
          
-        output = output.mean(dim=1)                 # torch.Size([N, d_model])
-        # output = F.relu(output)
+        output = output.mean(dim=-1)                # torch.Size([N, action_dim])
+        output = F.tanh(output)
         mask_probs = self.mask_net(output)          # torch.Size([N, action_dim])
         action_logits = self.actor_net(output)      # torch.Size([N, action_dim])
         values = self.critic_net(output)            # torch.Size([N, 1])
