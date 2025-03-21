@@ -27,6 +27,7 @@ from mask_pack.common.torch_layers import (
     TransfromerNetwork2,
     TransfromerNetwork3,
     TransfromerNetwork4,
+    TransfromerNetwork5,
 )
 from mask_pack.common.preprocessing import preprocess_obs
 from mask_pack.common.distributions import (
@@ -79,6 +80,7 @@ class CustomActorCriticPolicy(BasePolicy):
         "TransfromerNetwork2": TransfromerNetwork2,
         "TransfromerNetwork3": TransfromerNetwork3,
         "TransfromerNetwork4": TransfromerNetwork4,
+        "TransfromerNetwork5": TransfromerNetwork5,
     }
 
     def __init__(
@@ -229,6 +231,8 @@ class CustomActorCriticPolicy(BasePolicy):
                 module_gains[self.network.transformer] = np.sqrt(2)
                 module_gains[self.network.l1] = np.sqrt(2)
                 module_gains[self.network.l2] = np.sqrt(2)
+                if self.network.l3 is not None:
+                    module_gains[self.network.l3] = np.sqrt(2)
 
             for module, gain in module_gains.items():
                 module.apply(partial(self.init_weights, gain=gain))
