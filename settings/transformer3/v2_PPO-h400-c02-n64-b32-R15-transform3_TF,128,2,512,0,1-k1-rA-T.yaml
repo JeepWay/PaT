@@ -25,9 +25,9 @@ policy_kwargs: &id001
     position_encode: true
     use_pad_mask: false
     transformer_kwargs:
-      d_model: 64
-      nhead: 4
-      dim_feedforward: 256
+      d_model: 128
+      nhead: 2
+      dim_feedforward: 512
       dropout: 0.0
       batch_first: true
       norm_first: false
