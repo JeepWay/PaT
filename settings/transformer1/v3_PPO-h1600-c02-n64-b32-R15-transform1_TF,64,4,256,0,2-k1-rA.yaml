@@ -62,5 +62,5 @@ PPO_kwargs:
   mask_coef: 0.5
   add_entropy_loss: true
   ent_coef: 0.01
-  add_invalid_probs: false
+  add_invalid_probs: true
   invalid_probs_coef: 0.01
