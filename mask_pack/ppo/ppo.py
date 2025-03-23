@@ -271,21 +271,23 @@ class PPO(OnPolicyAlgorithm):
                 else:
                     entropy_loss = 0.0
 
-                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
-
                 # mask loss
-                pred_mask = self.policy.predict_masks(rollout_data.observations)
-                truth_mask = rollout_data.truth_masks
-                mask_loss = th.nn.BCELoss()(pred_mask, truth_mask)
-                mask_losses.append(mask_loss.item())
+                mask_loss = 0.0
                 if self.add_mask_loss:
-                    loss += self.mask_coef * mask_loss
-                        
+                    pred_mask = self.policy.predict_masks(rollout_data.observations)
+                    truth_mask = rollout_data.truth_masks
+                    mask_loss = th.nn.BCELoss()(pred_mask, truth_mask)
+                    mask_losses.append(mask_loss.item())
+
                 # invalid probs loss
-                invalid_probs_loss = th.mean(invalid_probs)
-                invalid_probs_losses.append(invalid_probs_loss.item())
+                invalid_probs_loss = 0.0
                 if self.add_invalid_probs:
-                    loss += self.invalid_probs_coef * invalid_probs_loss
+                    invalid_probs_loss = th.mean(invalid_probs)
+                    invalid_probs_losses.append(invalid_probs_loss.item())
+
+                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss \
+                        + self.mask_coef * mask_loss + self.invalid_probs_coef * invalid_probs_loss
+
 
                 # Calculate approximate form of reverse KL Divergence for early stopping
                 # see issue #417: https://github.com/DLR-RM/stable-baselines3/issues/417
