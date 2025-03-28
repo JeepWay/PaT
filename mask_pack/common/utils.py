@@ -2,6 +2,8 @@ from typing import Union
 from stable_baselines3.common.type_aliases import Schedule
 import torch.nn as nn
 import torch as th
+import random
+import numpy as np
 
 def get_schedule_fn(initial_value: Union[float, str]) -> Schedule:
     """
@@ -22,6 +24,28 @@ def get_schedule_fn(initial_value: Union[float, str]) -> Schedule:
         return progress_remaining * initial_value_
 
     return func
+
+
+def set_random_seed(seed: int, using_cuda: bool = False) -> None:
+    """
+    Seed the different random generators.
+
+    :param seed:
+    :param using_cuda:
+    """
+    # Seed python RNG
+    random.seed(seed)
+    # Seed numpy RNG
+    np.random.seed(seed)
+    # seed the RNG for all devices (both CPU and CUDA)
+    th.manual_seed(seed)
+    # force to set the seed for generating random numbers on all GPUs
+    th.cuda.manual_seed_all(seed)
+
+    if using_cuda:
+        # Deterministic operations for CuDNN, it may impact performances
+        th.backends.cudnn.deterministic = True
+        th.backends.cudnn.benchmark = False
 
 
 # Necessary for my KFAC implementation.
