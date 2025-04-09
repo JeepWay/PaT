@@ -6,6 +6,7 @@ import numpy as np
 import torch as th
 from gymnasium import spaces
 from collections import deque
+import copy
 
 # from stable_baselines3.common.base_class import BaseAlgorithm
 # from stable_baselines3.common.buffers import DictRolloutBuffer, RolloutBuffer
@@ -139,7 +140,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             **self.rollout_buffer_kwargs,
         )
         self.policy = self.policy_class(  # type: ignore[assignment]
-            self.observation_space, self.action_space, self.lr_schedule, use_sde=self.use_sde, **self.policy_kwargs
+            self.observation_space, self.action_space, self.lr_schedule, use_sde=self.use_sde, upscale_obs=self.upscale_obs, **self.policy_kwargs
         )
         self.policy = self.policy.to(self.device)
 
@@ -181,6 +182,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 self.policy.reset_noise(env.num_envs)
 
             with th.no_grad():
+                if self.upscale_obs:
+                    assert self._last_obs[MASK].shape[-1] <= self.action_space.n, "Mask size should be smaller than action space size."
+                    orig_obs = copy.deepcopy(self._last_obs)
+                    self._last_obs = self.policy._upscale_observation(self._last_obs)
                 # Convert to pytorch tensor or to TensorDict
                 obs_tensor = obs_as_tensor(self._last_obs, self.device)
                 actions, values, log_probs, pred_mask_probs = self.policy(obs_tensor)
@@ -200,6 +205,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # as we are sampling from an unbounded Gaussian distribution
                     clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
+            if self.upscale_obs:
+                clipped_actions = self.policy._downscale_action(clipped_actions, orig_obs)
             new_obs, rewards, dones, infos = env.step(clipped_actions)
 
             self.num_timesteps += env.num_envs
@@ -226,6 +233,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 ):
                     terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
                     with th.no_grad():
+                        if self.upscale_obs:
+                            terminal_obs = self.policy._upscale_observation(terminal_obs)
                         terminal_value = self.policy.predict_values(terminal_obs)[0]  # type: ignore[arg-type]
                     rewards[idx] += self.gamma * terminal_value
 
@@ -243,6 +252,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self._last_episode_starts = dones
 
         with th.no_grad():
+            if self.upscale_obs:
+                new_obs = self.policy._upscale_observation(new_obs)
             # Compute value for the last timestep
             values = self.policy.predict_values(obs_as_tensor(new_obs, self.device))  # type: ignore[arg-type]
 

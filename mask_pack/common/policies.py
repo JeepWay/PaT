@@ -106,6 +106,7 @@ class CustomActorCriticPolicy(BasePolicy):
         network_kwargs: Optional[Dict[str, Any]] = None,
         dist_kwargs: Optional[Dict[str, Any]] = None,
         mask_type: str = "truth",
+        upscale_obs: bool = False,
     ):
         if isinstance(network, str):
             self.network_class = self._get_network_from_name(network)
@@ -113,6 +114,7 @@ class CustomActorCriticPolicy(BasePolicy):
             self.network_class = network
         self.network_kwargs = network_kwargs
         self.mask_type = mask_type
+        self.upscale_obs = upscale_obs
 
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
@@ -322,6 +324,9 @@ class CustomActorCriticPolicy(BasePolicy):
         # Switch to eval mode (this affects batch norm / dropout)
         self.set_training_mode(False)
 
+        if self.upscale_obs:
+            orig_obs = copy.deepcopy(observation)
+            observation = self._upscale_observation(observation)
         obs_tensor, vectorized_env = self.obs_to_tensor(observation)
 
         with th.no_grad():
@@ -329,6 +334,8 @@ class CustomActorCriticPolicy(BasePolicy):
         # Convert to numpy, and reshape to the original action shape
         actions = actions.cpu().numpy().reshape((-1, *self.action_space.shape))  # type: ignore[misc, assignment]
 
+        if self.upscale_obs:
+            actions = self._downscale_action(actions, orig_obs)
         return actions, state  # type: ignore[return-value]
 
     def _predict(self, observation: PyTorchObs, deterministic: bool = False) -> th.Tensor:
@@ -434,4 +441,41 @@ class CustomActorCriticPolicy(BasePolicy):
         obs = preprocess_obs(obs, self.observation_space, normalize_images=self.normalize_images)
         return self.network.forward_mask_probs(obs[BIN], obs[MASK])
 
+    def _upscale_observation(self, observation: Union[np.ndarray, Dict[str, np.ndarray]]):
+        bin_data = observation[BIN]
+        batch_size = bin_data.shape[0]
+        
+        # bin
+        input_bin_c, input_bin_w, input_bin_h = observation[BIN][0].shape
+        target_bin_c, target_bin_w, target_bin_h = self.observation_space.spaces[BIN].shape
+        target_bin = np.zeros((batch_size, target_bin_c, target_bin_w, target_bin_h), dtype=bin_data.dtype)
+        target_bin[:, 0, :input_bin_w, :input_bin_h] = bin_data[:, 0] 
+        fill_values_w = bin_data[:, 1, 0, 0]
+        target_bin[:, 1] = fill_values_w[:, None, None] * np.ones((batch_size, target_bin_w, target_bin_h), dtype=bin_data.dtype)
+        fill_values_h = bin_data[:, 2, 0, 0]
+        target_bin[:, 2] = fill_values_h[:, None, None] * np.ones((batch_size, target_bin_w, target_bin_h), dtype=bin_data.dtype)
+        
+        # mask
+        mask_data = observation[MASK] 
+        target_mask_shape = self.observation_space.spaces[MASK].shape
+        mask_data = mask_data.reshape(batch_size, input_bin_w, input_bin_h)
+        target_mask = np.zeros((batch_size, target_bin_w, target_bin_h), dtype=bin_data.dtype)
+        target_mask[:, :input_bin_w, :input_bin_h] = mask_data[:]
+        target_mask = target_mask.reshape(batch_size, target_mask_shape[0])
+        
+        return {BIN: target_bin, MASK: target_mask}
+    
+    def _downscale_action(self, actions: np.ndarray, orig_obs: Union[np.ndarray, Dict[str, np.ndarray]]) -> np.ndarray:
+        """
+        Downscale the action to the original shape.
 
+        :param actions: The action to be downscaled
+        :return: The downscaled action
+        """
+        input_bin_c, input_bin_w, input_bin_h = orig_obs[BIN][0].shape
+        target_bin_c, target_bin_w, target_bin_h = self.observation_space.spaces[BIN].shape
+        scale_i = actions // target_bin_h
+        scale_j = actions % target_bin_h
+        orig_action = scale_i * input_bin_h + scale_j
+        orig_action = np.where(orig_action < (input_bin_w * input_bin_h), orig_action, (input_bin_w * input_bin_h - 1))
+        return orig_action
