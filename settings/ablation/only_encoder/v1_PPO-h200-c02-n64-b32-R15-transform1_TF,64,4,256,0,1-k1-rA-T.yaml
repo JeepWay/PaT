@@ -1,14 +1,16 @@
-env_id: 2DBpp-v2
+env_id: 2DBpp-v1
 n_envs: 4
 train_seed: 0
 eval_seed: 10
-total_timesteps: 6000000
-n_eval_episodes: 20
-log_dir: logs/acktr
+total_timesteps: 3000000
+n_eval_episodes: 50
+n_eval_seeds: 20
+log_dir: logs/ppo
 env_kwargs:
   render_mode: human
   bin_channels: 3
-  items_per_bin: 20
+  min_items_per_bin: 10
+  max_items_per_bin: 20
   area_reward_coef: 0.4
   constant_penalty: -5.0
   action_fail: continue
@@ -18,9 +20,19 @@ monitor_kwargs:
   - PE
 policy_kwargs: &id001
   normalize_images: false
-  network: CnnMlpNetwork2
+  network: TransfromerNetwork1
   network_kwargs:
-    hidden_dim: 400
+    hidden_dim: 200
+    position_encode: true
+    use_pad_mask: false
+    num_layers: 1
+    transformer_kwargs:
+      d_model: 64
+      nhead: 4
+      dim_feedforward: 256
+      dropout: 0.0
+      batch_first: true
+      norm_first: false
   dist_kwargs:
     mask_strategy: replace
     mask_minus_coef: 15
@@ -30,12 +42,16 @@ policy_kwargs: &id001
     invalid_probs_strategy: naive
   mask_type: truth
   ortho_init: true
-ACKTR_kwargs:
+PPO_kwargs:
   policy: CnnMlpPolicy
   learning_rate: 0.001
   n_steps: 64
+  batch_size: 32
+  n_epochs: 1
   gamma: 0.99
   gae_lambda: 0.98
+  clip_range: 0.2
+  normalize_advantage: true
   vf_coef: 0.5
   max_grad_norm: 5
   stats_window_size: 100
@@ -49,4 +65,3 @@ ACKTR_kwargs:
   ent_coef: 0.01
   add_invalid_probs: true
   invalid_probs_coef: 0.01
-  acktr: true
