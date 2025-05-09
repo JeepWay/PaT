@@ -74,7 +74,7 @@ def test(config: Dict[str, Any]):
     print(f"\n{'-' * 30}   Start Testing   {'-' * 30}\n")
     ep_rewards_list = []
     ep_PEs_list = []
-    for i in range(5):
+    for i in range(config["n_eval_seeds"]):
         eval_env = make_vec_env(
             config["env_id"], 
             n_envs=1, 
@@ -101,7 +101,7 @@ def test(config: Dict[str, Any]):
     std_PE = np.std(ep_PEs_list)
     print(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}")
     print(f"mean_PE: {mean_PE:.3f} +/- {std_PE:.3f}")
-    with open(os.path.join(config['test_dir'], "eval.txt"), "w") as file:
+    with open(os.path.join(config['test_dir'], f"eval_{config['n_eval_episodes']}_{config['n_eval_seeds']}.txt"), "w") as file:
         file.write(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}\n")
         file.write(f"mean_PE: {mean_PE:.3f} +/- {std_PE:.3f}\n")
     print(f"\n{'-' * 30}   Complete Testing   {'-' * 30}\n")
