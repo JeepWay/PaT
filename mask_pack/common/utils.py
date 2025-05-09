@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch as th
 import random
 import numpy as np
+import os
 
 def get_schedule_fn(initial_value: Union[float, str]) -> Schedule:
     """
@@ -41,7 +42,11 @@ def set_random_seed(seed: int, using_cuda: bool = False) -> None:
     th.manual_seed(seed)
     # force to set the seed for generating random numbers on all GPUs
     th.cuda.manual_seed_all(seed)
-
+    # https://pytorch.org/docs/stable/generated/torch.use_deterministic_algorithms.html
+    os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+    # avoiding nondeterministic algorithms (see https://pytorch.org/docs/stable/notes/randomness.html)
+    th.use_deterministic_algorithms(True)
+    
     if using_cuda:
         # Deterministic operations for CuDNN, it may impact performances
         th.backends.cudnn.deterministic = True
