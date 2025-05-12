@@ -113,7 +113,6 @@ class PPO(OnPolicyAlgorithm):
         ent_coef: float = 0.0,
         add_invalid_probs: bool = False,
         invalid_probs_coef: float = 0.0,
-        upscale_obs: bool = False,
     ):
         super().__init__(
             policy,
@@ -180,7 +179,6 @@ class PPO(OnPolicyAlgorithm):
         self.add_entropy_loss = add_entropy_loss
         self.add_invalid_probs = add_invalid_probs
         self.invalid_probs_coef = invalid_probs_coef
-        self.upscale_obs = upscale_obs
 
         if _init_setup_model:
             self._setup_model()
