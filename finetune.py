@@ -20,21 +20,22 @@ from envs.register import registration_envs
 from mask_pack import PPO, ACKTR
 from mask_pack.common.evaluation import evaluate_policy
 from mask_pack.common.callbacks import MetricsCallback
-
+from mask_pack.common.dummy_vec_env import CustomDummyVecEnv
 
 def train(config: Dict[str, Any], finetune_config: Dict[str, Any]):
     print(f"\n{'-' * 30}   Start Training   {'-' * 30}\n")
-    vec_env = make_vec_env(
+    vec_env: CustomDummyVecEnv = make_vec_env(
         env_id=finetune_config["env_id"], 
         n_envs=finetune_config["n_envs"], 
         monitor_dir=finetune_config['save_path'], 
         monitor_kwargs=finetune_config["monitor_kwargs"],
         env_kwargs=finetune_config["env_kwargs"],
+        vec_env_cls=CustomDummyVecEnv,
     )
     if "PPO" in config['save_path']:
         model = PPO.load(os.path.join(config['test_dir'], config["env_id"]), tensorboard_log=finetune_config['save_path'], **finetune_config["PPO_kwargs"])  # need to reset ppo.clip_range
+        vec_env.rebuild_obs_buf(model.observation_space, model.action_space)
         model.env = vec_env
-        model._last_obs = None
         model.n_envs = finetune_config["n_envs"]
         model.env.seed(finetune_config["train_seed"])
         model.learn(
@@ -46,8 +47,8 @@ def train(config: Dict[str, Any], finetune_config: Dict[str, Any]):
         )
     elif "ACKTR" in config['save_path']:
         model = ACKTR.load(os.path.join(config['test_dir'], config["env_id"]), tensorboard_log=finetune_config['save_path'], **finetune_config["ACKTR_kwargs"])
+        vec_env.rebuild_obs_buf(model.observation_space, model.action_space)
         model.env = vec_env
-        model._last_obs = None
         model.n_envs = finetune_config["n_envs"]
         model.env.seed(finetune_config["train_seed"])
         model.learn(
@@ -66,12 +67,13 @@ def test(config: Dict[str, Any], finetune_config: Dict[str, Any], is_finetuned: 
     print(f"\n{'-' * 30} Start Testing On {'Finetuned' if is_finetuned else 'Pretrained'} {'-' * 30}\n")
     ep_rewards_list = []
     ep_PEs_list = []
-    for i in range(5):
-        eval_env = make_vec_env(
+    for i in range(config["n_eval_seeds"]):
+        eval_env: CustomDummyVecEnv = make_vec_env(
             env_id=finetune_config["env_id"], 
             n_envs=1, 
             seed=int(finetune_config["eval_seed"] + i*10), 
             env_kwargs=finetune_config["env_kwargs"],
+            vec_env_cls=CustomDummyVecEnv,
         )
         # must pass config["PPO_kwargs"] to reset the `self.clip_range` to the constant
         if "PPO" in config['test_dir']:
@@ -80,6 +82,7 @@ def test(config: Dict[str, Any], finetune_config: Dict[str, Any], is_finetuned: 
         elif "ACKTR" in config['test_dir']:
             model = ACKTR.load(os.path.join(finetune_config['test_dir'] if is_finetuned else config['test_dir'], 
                         config["env_id"]), **finetune_config["ACKTR_kwargs"])
+        eval_env.rebuild_obs_buf(model.observation_space, model.action_space)
         episode_rewards, _, episode_PEs = evaluate_policy(
             model, eval_env, 
             n_eval_episodes=finetune_config["n_eval_episodes"], 
@@ -103,9 +106,9 @@ def test(config: Dict[str, Any], finetune_config: Dict[str, Any], is_finetuned: 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="2D Mask BPP with PPO and ACKTR")
-    parser.add_argument('--config_path', default="settings/transformer1/v2_PPO-h400-c02-n64-b32-R15-transform1_TF,64,4,256,0,2-k1-rA.yaml", type=str, help="Path to the configuration file with .yaml extension.")
+    parser.add_argument('--config_path', default="settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml", type=str, help="Path to the configuration file with .yaml extension.")
     parser.add_argument('--mode', default="both", type=str, choices=["train", "test", "both"], help="Mode to train or test or both of them.")
-    parser.add_argument('--finetune_config', default="settings/finetune/v1_10000.yaml", type=str, help="Path to the configuration file for fine-tuning.")
+    parser.add_argument('--finetune_config', default="settings/finetune/v2_40000.yaml", type=str, help="Path to the configuration file for fine-tuning.")
     
     args = parser.parse_args()
     if not args.config_path.endswith(".yaml"):
