@@ -74,6 +74,13 @@ class CustomDummyVecEnv(VecEnv):
             obs, self.buf_rews[env_idx], terminated, truncated, self.buf_infos[env_idx] = self.envs[env_idx].step(
                 self.actions[env_idx]
             )
+            
+            # upscale reward
+            if self.all_obs_space[env_idx] != self.observation_space:
+                if self.buf_rews[env_idx] > 0:
+                    ratio = self.action_space.n / self.all_action_space[env_idx].n 
+                    self.buf_rews[env_idx] *= ratio
+            
             # convert to SB3 VecEnv api
             self.buf_dones[env_idx] = terminated or truncated
             # See https://github.com/openai/gym/issues/3102
