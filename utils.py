@@ -4,6 +4,7 @@ import csv
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 def formatted_result(dir: str) -> None: 
     """
@@ -95,37 +96,58 @@ def update_yaml_files(dir):
             with open(filepath, 'r') as file:
                 data = yaml.load(file, Loader=yaml.UnsafeLoader)  # 讀取YAML文件
 
+            if "-F" in filename:
+                data['PPO_kwargs']['add_invalid_probs'] = False
+            else:
+                data['PPO_kwargs']['add_invalid_probs'] = True
+                
             if "v" in filename:
                 if "v1" in filename:
                     data['env_id'] = '2DBpp-v1'
                     data['total_timesteps'] = 3000000
-                    data['env_kwargs']['items_per_bin'] = 15
+                    data['env_kwargs']['min_items_per_bin'] = 10
+                    data['env_kwargs']['max_items_per_bin'] = 20
                     if "atten1" in filename: 
                         data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
+                    elif "transform" in filename:
+                        version = filename.split('transform')[1].split('_')[0]
+                        data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
                         data['policy_kwargs']['network'] = "CnnMlpNetwork1"
                 elif "v2" in filename:
                     data['env_id'] = '2DBpp-v2'
                     data['total_timesteps'] = 6000000
-                    data['env_kwargs']['items_per_bin'] = 20
+                    data['env_kwargs']['min_items_per_bin'] = 15
+                    data['env_kwargs']['max_items_per_bin'] = 25
                     if "atten1" in filename: 
                         data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
+                    elif "transform" in filename:
+                        version = filename.split('transform')[1].split('_')[0]
+                        data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
                         data['policy_kwargs']['network'] = "CnnMlpNetwork2"
                 elif "v3" in filename:
                     data['env_id'] = '2DBpp-v3'
                     data['total_timesteps'] = 12500000
-                    data['env_kwargs']['items_per_bin'] = 25
+                    data['env_kwargs']['min_items_per_bin'] = 20
+                    data['env_kwargs']['max_items_per_bin'] = 30
                     if "atten1" in filename: 
                         data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
+                    elif "transform" in filename:
+                        version = filename.split('transform')[1].split('_')[0]
+                        data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
                         data['policy_kwargs']['network'] = "CnnMlpNetwork3"
                 elif "v4" in filename:
                     data['env_id'] = '2DBpp-v4'
                     data['total_timesteps'] = 12500000
-                    data['env_kwargs']['items_per_bin'] = 25
+                    data['env_kwargs']['min_items_per_bin'] = 20
+                    data['env_kwargs']['max_items_per_bin'] = 30
                     if "atten1" in filename:
                         data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
+                    elif "transform" in filename:
+                        version = filename.split('transform')[1].split('_')[0]
+                        data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
                         data['policy_kwargs']['network'] = "CnnMlpNetwork4"
             else:
@@ -198,6 +220,31 @@ def update_yaml_files(dir):
                 data['policy_kwargs']['mask_type'] = 'predict'
             else:
                 data['policy_kwargs']['mask_type'] = 'truth'
+
+            if "transform" in filename:
+                str1 = filename.split('transform')[1].split('-')[0]
+                version = str1[0]
+                position_encode = True if str1[2] == 'T' else False
+                use_pad_mask = True if str1[3] == 'T' else False
+                d_model = int(str1.split(',')[1])
+                nhead = int(str1.split(',')[2])
+                dim_feedforward = int(str1.split(',')[3])
+                dropout = float(str1.split(',')[4])
+                num_layers = int(str1.split(',')[5])
+                data['policy_kwargs']['network_kwargs']['position_encode'] = position_encode
+                data['policy_kwargs']['network_kwargs']['use_pad_mask'] = use_pad_mask
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['d_model'] = d_model
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['nhead'] = nhead
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['dim_feedforward'] = dim_feedforward
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['dropout'] = dropout
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['batch_first'] = True
+                data['policy_kwargs']['network_kwargs']['transformer_kwargs']['norm_first'] = False
+                if version in ['1', '2']:
+                    data['policy_kwargs']['network_kwargs']['num_layers'] = num_layers
+                elif version in ['3', '4']:
+                    data['policy_kwargs']['network_kwargs']['transformer_kwargs']['num_encoder_layers'] = num_layers
+                    data['policy_kwargs']['network_kwargs']['transformer_kwargs']['num_decoder_layers'] = num_layers
+
 
             # update the YAML file
             with open(filepath, 'w') as file:
@@ -283,11 +330,52 @@ def plot_all_mask_diff_strategy_coef():
     plt.savefig(f"img/PE_diff_mask_type_coef.png")
 
 
-if __name__ == "__main__":
-    # $ tensorboard --logdir backup/diff_mask
-    formatted_result("logs/ppo")
-    # copy_file1("./settings")
-    # copy_file2("./settings")
-    # update_yaml_files("./settings")
-    # plot_all_mask_diff_strategy_coef()
+def plot_training_curve_pe(
+    dirs: dict[str, str], 
+    title: str, 
+    xlabel: str = 'Steps',
+    ylabel: str = 'Avg Packing Efficiency',
+    plot_moving_average: bool = True, 
+    plot_raw: bool = True,
+    window_size: int = 100,
+) -> None:
+    """
+    Plot the training curve of packing efficiency from multiple metrics files, with option for raw or moving average.
 
+    Args:
+        dirs (dict): Dictionary mapping labels to log paths.
+        title (str): Title of the plot.
+        use_moving_average (bool): If True, plot moving average; if False, plot raw values.
+        window_size (int): Window size for moving average calculation.
+    """
+    plt.figure(figsize=(10, 6))
+    colors = plt.cm.tab10(np.linspace(0, 1, len(dirs)))  # Generate distinct colors
+
+    for idx, (label, log_file) in enumerate(dirs.items()):
+        if not os.path.exists(log_file):
+            print(f"Log file {log_file} does not exist.")
+            continue
+
+        df = pd.read_csv(log_file)
+        df = df.dropna(subset=['timesteps', 'ep_PE_mean'])
+        df['timesteps'] = pd.to_numeric(df['timesteps'], errors='coerce')
+        df['ep_PE_mean'] = pd.to_numeric(df['ep_PE_mean'], errors='coerce')
+        df = df.dropna()
+
+        timesteps = df['timesteps'].values
+        ep_pe_mean = df['ep_PE_mean'].values
+
+        if plot_moving_average:
+            ep_pe_mean_ma = np.convolve(ep_pe_mean, np.ones(window_size)/window_size, mode='valid')
+            timesteps_ma = timesteps[window_size-1:]
+            plt.plot(timesteps_ma, ep_pe_mean_ma, label=label, color=colors[idx], linewidth=2)
+        
+        if plot_raw:
+            plt.plot(timesteps, ep_pe_mean, color=colors[idx], linewidth=1.5, alpha=0.2)
+
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(f"{title.replace(' ', '_')}_{ylabel.replace(' ', '_')}.png")
