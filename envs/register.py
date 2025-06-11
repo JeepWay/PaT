@@ -49,3 +49,27 @@ def registration_envs() -> None:
             'bin_h': 40,
         }
     )
+    register(
+        id='2DBpp-v7',                                  
+        entry_point='envs.bpp:BppEnv',   
+        kwargs={
+            'bin_w': 50,
+            'bin_h': 32,
+        }
+    )
+    register(
+        id='2DBpp-v8',                                  
+        entry_point='envs.bpp:BppEnv',   
+        kwargs={
+            'bin_w': 25,
+            'bin_h': 64,
+        }
+    )
+    register(
+        id='2DBpp-v9',                                  
+        entry_point='envs.bpp:BppEnv',   
+        kwargs={
+            'bin_w': 64,
+            'bin_h': 25,
+        }
+    )
