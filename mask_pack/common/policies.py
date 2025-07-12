@@ -16,18 +16,11 @@ from stable_baselines3.common.distributions import Distribution
 
 from mask_pack.common.torch_layers import (
     BaseNetwork,
-    CnnAttenMlpNetwork1_v1,
-    CnnAttenMlpNetwork1_v2,
-    CnnAttenMlpNetwork1_v3,
     CnnMlpNetwork1, 
     CnnMlpNetwork2, 
     CnnMlpNetwork3, 
-    CnnMlpNetwork4,
     TransfromerNetwork1,
-    TransfromerNetwork2,
     TransfromerNetwork3,
-    TransfromerNetwork4,
-    TransfromerNetwork5,
 )
 from mask_pack.common.preprocessing import preprocess_obs
 from mask_pack.common.distributions import (
@@ -69,18 +62,11 @@ class CustomActorCriticPolicy(BasePolicy):
     """   
 
     network_aliases: ClassVar[Dict[str, Type[BaseNetwork]]] = {
-        "CnnAttenMlpNetwork1_v1": CnnAttenMlpNetwork1_v1,
-        "CnnAttenMlpNetwork1_v2": CnnAttenMlpNetwork1_v2,
-        "CnnAttenMlpNetwork1_v3": CnnAttenMlpNetwork1_v3,
         "CnnMlpNetwork1": CnnMlpNetwork1,
         "CnnMlpNetwork2": CnnMlpNetwork2,
         "CnnMlpNetwork3": CnnMlpNetwork3,
-        "CnnMlpNetwork4": CnnMlpNetwork4,
         "TransfromerNetwork1": TransfromerNetwork1,
-        "TransfromerNetwork2": TransfromerNetwork2,
         "TransfromerNetwork3": TransfromerNetwork3,
-        "TransfromerNetwork4": TransfromerNetwork4,
-        "TransfromerNetwork5": TransfromerNetwork5,
     }
 
     def __init__(
