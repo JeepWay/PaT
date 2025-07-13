@@ -75,11 +75,11 @@ class CustomDummyVecEnv(VecEnv):
                 self.actions[env_idx]
             )
             
-            # upscale reward
-            if self.all_obs_space[env_idx] != self.observation_space:
-                if self.buf_rews[env_idx] > 0:
-                    ratio = self.action_space.n / self.all_action_space[env_idx].n 
-                    self.buf_rews[env_idx] *= ratio
+            # # upscale reward
+            # if self.all_obs_space[env_idx] != self.observation_space:
+            #     if self.buf_rews[env_idx] > 0:
+            #         ratio = self.action_space.n / self.all_action_space[env_idx].n 
+            #         self.buf_rews[env_idx] *= ratio
             
             # convert to SB3 VecEnv api
             self.buf_dones[env_idx] = terminated or truncated
