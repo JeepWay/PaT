@@ -1,40 +1,84 @@
-# main setting
+# get testing data
+python get_env_data.py --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python get_env_data.py --config_path settings/main/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python get_env_data.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+
+
+# Main setting (PaT)
 python main.py --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 python main.py --config_path settings/main/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 python main.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 python main.py --config_path settings/main/v4_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 
 
-# ablation/orig_net (PaC)
-python main.py --config_path settings/ablation/orig_net/v1_PPO-h200-c02-n64-b32-R15-k1-rA.yaml
-python main.py --config_path settings/ablation/orig_net/v2_PPO-h400-c02-n64-b32-R15-k1-rA.yaml
-python main.py --config_path settings/ablation/orig_net/v3_PPO-h1600-c02-n64-b32-R15-k1-rA.yaml
-python main.py --config_path settings/ablation/orig_net/v4_PPO-h1600-c02-n64-b32-R15-k1-rA.yaml
+# Replacing Transformer with CNN (PaC)
+python main.py --config_path settings/cnn_net/v1_PPO-h200-c02-n64-b32-R15-k1-rA.yaml
+python main.py --config_path settings/cnn_net/v2_PPO-h400-c02-n64-b32-R15-k1-rA.yaml
+python main.py --config_path settings/cnn_net/v3_PPO-h1600-c02-n64-b32-R15-k1-rA.yaml
 
 
-# ablation/only_encoder
-python main.py --config_path settings/ablation/only_encoder/v1_PPO-h200-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T.yaml
-python main.py --config_path settings/ablation/only_encoder/v2_PPO-h400-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T.yaml
-python main.py --config_path settings/ablation/only_encoder/v3_PPO-h1600-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T.yaml
-python main.py --config_path settings/ablation/only_encoder/v4_PPO-h1600-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T.yaml
+# Different reward functions (cluster size X compactness)
+python main.py --config_path settings/diff_reward_type/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T.yaml
+python main.py --config_path settings/diff_reward_type/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T.yaml
+python main.py --config_path settings/diff_reward_type/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T.yaml
 
 
-# ablation/pred_mask
-python main.py --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-P.yaml
-python main.py --config_path settings/main/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-P.yaml
-python main.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-P.yaml
-python main.py --config_path settings/main/v4_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-P.yaml
-
-# finetune
-python main_mixed.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml
-python finetune.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml --finetune_config settings/finetune/v1_10000.yaml
-python finetune.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml --finetune_config settings/finetune/v2_10000.yaml
-python finetune.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml --finetune_config settings/finetune/v3_10000.yaml
-python finetune.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml --finetune_config settings/finetune/v5_10000.yaml
-python finetune.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed.yaml --finetune_config settings/finetune/v6_10000.yaml
+# Generalization Mechanism (direct transfer and testing)
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml --target_config_path settings/general/v1_10000.yaml
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml --target_config_path settings/general/v2_10000.yaml
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml --target_config_path settings/general/v3_10000.yaml
+python main_general.py --orig_config_path settings/main/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml --target_config_path settings/general/v1_10000.yaml
 
 
-# different shape same area
-python main.py --config_path settings/diff_shape/v7_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
-python main.py --config_path settings/diff_shape/v8_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
-python main.py --config_path settings/diff_shape/v9_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+# Generalization Mechanism (mixed training and testing)
+python main_mixed.py --config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v1_10000.yaml
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v2_10000.yaml
+python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v3_10000.yaml
+
+
+# Multi layer for Transformer (2 layers)
+python main.py --config_path settings/multi_layer/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,2-k1-rA-T.yaml
+python main.py --config_path settings/multi_layer/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,2-k1-rA-T.yaml
+python main.py --config_path settings/multi_layer/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,2-k1-rA-T.yaml
+
+
+# Grid search of the coefficient for replace mask (10x10)
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v1_PPO-h200-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+
+
+# Grid search of the coefficient for replace mask (20x20)
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v2_PPO-h400-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+
+
+# Grid search of the coefficient for replace mask (40x40)
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
+
+
