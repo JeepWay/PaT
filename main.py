@@ -1,5 +1,4 @@
 from typing import Dict, Any
-import gymnasium as gym
 import argparse
 import yaml
 import os
@@ -17,20 +16,22 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import get_system_info
 
 from envs.register import registration_envs
-from mask_pack import PPO, ACKTR
+from mask_pack import PPO
 from mask_pack.common.evaluation import evaluate_policy
 from mask_pack.common.callbacks import MetricsCallback
 
 
 def train(config: Dict[str, Any]):
     print(f"\n{'-' * 30}   Start Training   {'-' * 30}\n")
-    run = wandb.init(
-        project=config["env_id"],
-        name=config['save_path'].split("2DBpp-")[1],
-        config=config,
-        sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-        resume = None,
-    )
+    if config['use_wandb']:
+        run = wandb.init(
+            project=config["env_id"],
+            name=config['save_path'].split("2DBpp-")[1],
+            config=config,
+            sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
+            resume = None,
+        )
+
     vec_env = make_vec_env(
         config["env_id"], 
         n_envs=config["n_envs"], 
@@ -43,30 +44,24 @@ def train(config: Dict[str, Any]):
         with open(os.path.join(config['save_path'], "model.txt"), "w") as f:
             f.write(f"PPO's network architecture: \n{str(model.policy)}\n")
             f.write(f"\nPPO's number of parameters: {sum(p.numel() for p in model.policy.parameters())}\n")
+            
+        callback_list = [
+            MetricsCallback(config['save_path']),
+        ]
+        if config['use_wandb']:
+            callback_list.append(WandbCallback(verbose=config['PPO_kwargs']['verbose']))
         model.learn(
             total_timesteps=config["total_timesteps"], 
             progress_bar=True, 
-            callback=CallbackList([
-                MetricsCallback(config['save_path']),
-                WandbCallback(verbose=config['PPO_kwargs']['verbose']),
-            ])
+            callback=CallbackList(callback_list)
         )
-    elif "ACKTR" in config['save_path']:
-        model = ACKTR(env=vec_env, **config["ACKTR_kwargs"], tensorboard_log=config['save_path'])
-        with open(os.path.join(config['save_path'], "model.txt"), "w") as f:
-            f.write(f"ACKTR's network architecture: \n{str(model.policy)}\n")
-            f.write(f"\nACKTR's number of parameters: {sum(p.numel() for p in model.policy.parameters())}\n")
-        model.learn(
-            total_timesteps=config["total_timesteps"], 
-            progress_bar=True, 
-            callback=CallbackList([
-                MetricsCallback(config['save_path']),
-                WandbCallback(verbose=config['ACKTR_kwargs']['verbose']),
-            ])
-        )
+    else:
+        raise ValueError(f"Unsupported algorithm in {config['save_path']}")
+        
     print(f"Training finished. Model saved at {config['save_path']}")
     model.save(os.path.join(config['save_path'], config["env_id"]))
-    # run.finish()
+    if config['use_wandb']:
+        run.finish()
     print(f"\n{'-' * 30}   Complete Training   {'-' * 30}\n")
 
 
@@ -84,8 +79,9 @@ def test(config: Dict[str, Any]):
         # must pass config["PPO_kwargs"] to reset the `self.clip_range` to the constant
         if "PPO" in config['test_dir']:
             model = PPO.load(os.path.join(config['test_dir'], config["env_id"]), **config["PPO_kwargs"])
-        elif "ACKTR" in config['test_dir']:
-            model = ACKTR.load(os.path.join(config['test_dir'], config["env_id"]), **config["ACKTR_kwargs"])
+        else: 
+            raise ValueError(f"Unsupported algorithm in {config['test_dir']}")
+        
         episode_rewards, _, episode_PEs = evaluate_policy(
             model, eval_env, 
             n_eval_episodes=config["n_eval_episodes"], 
@@ -108,9 +104,10 @@ def test(config: Dict[str, Any]):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="2D Mask BPP with PPO and ACKTR")
-    parser.add_argument('--config_path', default="settings/main/v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml", type=str, help="Path to the configuration file with .yaml extension.")
+    parser = argparse.ArgumentParser(description="2D Bin Packing Environment")
+    parser.add_argument('--config_path', default="settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml", type=str, help="Path to the configuration file with .yaml extension.")
     parser.add_argument('--mode', default="both", type=str, choices=["train", "test", "both"], help="Mode to train or test or both of them.")
+    parser.add_argument('--use_wandb', action='store_true', help="Whether to use wandb for logging. Default is False.")
     args = parser.parse_args()
     if not args.config_path.endswith(".yaml"):
         raise ValueError("Please specify the path to the configuration file with a .yaml extension.")
@@ -119,6 +116,7 @@ if __name__ == "__main__":
     with open(args.config_path, "r") as file:
         print(f"Loading hyperparameters from: {args.config_path}")
         config = yaml.load(file, Loader=yaml.UnsafeLoader)
+        config['use_wandb'] = args.use_wandb
 
     # set `save_path` according to the name of the .yaml file
     config['save_path'] = os.path.join(config['log_dir'], 
@@ -148,11 +146,6 @@ if __name__ == "__main__":
 
         import shutil
         shutil.copy(args.config_path, os.path.join(config['save_path'], args.config_path.split('/')[-1])) 
-
-    if "attention_kwargs" in config["policy_kwargs"]["network_kwargs"]:
-        if config["policy_kwargs"]["network_kwargs"]["cnn_shortcut"] is True:
-            assert config["policy_kwargs"]["network_kwargs"]["attention_kwargs"]["out_embed_dim"] == 64, \
-                    "out_embed_dim of self-attention must be the same as the out_channels (64) of the CNN extractor, if cnn_shortcut is True."
                     
     # register custom environments
     registration_envs()
