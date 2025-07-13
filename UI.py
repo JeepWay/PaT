@@ -319,6 +319,6 @@ with gr.Blocks() as demo:
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="2D Bin Packing Environment")
-    parser.add_argument('--share', action='store_true', default=False, help="Whether to share the Gradio app publicly. Default is False.")
+    parser.add_argument('--share', default=True, help="Whether to share the Gradio app publicly. Default is True.")
     args = parser.parse_args()
     demo.launch(share=args.share)
