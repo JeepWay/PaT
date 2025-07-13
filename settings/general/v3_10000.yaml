@@ -1,5 +1,5 @@
-env_id: 2DBpp-v2
-n_envs: 5
+env_id: 2DBpp-v3
+n_envs: 4
 train_seed: 0
 eval_seed: 10
 total_timesteps: 10000
@@ -9,8 +9,8 @@ log_dir: logs/ppo
 env_kwargs:
   render_mode: human
   bin_channels: 3
-  min_items_per_bin: 15
-  max_items_per_bin: 25
+  min_items_per_bin: 20
+  max_items_per_bin: 30
   area_reward_coef: 0.4
   constant_penalty: -5.0
   action_fail: continue
