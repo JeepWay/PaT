@@ -2,104 +2,79 @@ import os
 import yaml
 import csv
 import math
+import matplotlib.axes as axes
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import logging
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-def formatted_result(dir: str) -> None: 
+
+def formatted_result(
+    root_dir: str, 
+    test_filename: str = 'eval_50_20.txt',
+    save_filename: str = 'testing_result.csv'
+) -> None: 
     """
-    Read the contents of eval.txt to extract the required values, 
-    and then format the results into a CSV file.
+    讀取目錄底下的所有子目錄，尋找指定的測試文件 test_filename，
+    並從中提取獎勵和 PE 的平均值和標準差。
     """
-    csv_file = 'formatted_result.csv'
-    csv_columns = ['DirName', 'Reward', 'PE']
-    file_handler = open(csv_file, f"w+", newline="\n")
-    writer = csv.writer(file_handler)
-    writer.writerow(csv_columns)  # Write header
+    csv_columns = ['Dir_Name', 'Reward_Mean', 'Reward_Std', 
+                   'PE_Mean', 'PE_Std', 
+                   'PE_Percent_Mean', 'PE_Percent_Std']
+    
+    with open(save_filename, "w+", newline="\n") as file_handler:
+        writer = csv.writer(file_handler)
+        writer.writerow(csv_columns)
 
-    def custom_key(x):
-        order1 = x.split('_')[0].split('v')[0]
-        if 'PPO' in x:
-            order2 = 1
-        elif 'ACKTR' in x:
-            order2 = 2
-        elif 'DQN' in x:
-            order2 = 3
+        for dirpath, sub_dirnames, filenames in os.walk(root_dir):
+            logging.debug(f"Directory: {dirpath}")
+            logging.debug(f"Subdirectories: {sub_dirnames}")
+            logging.debug(f"Files: {filenames}\n")
+            
+            if test_filename in filenames:
+                test_file_path = os.path.join(dirpath, test_filename)
+                reward_mean = reward_std = pe_mean = pe_std = pe_percent_mean = pe_percent_std = "N/A"
+                
+                with open(test_file_path, 'r') as file:
+                    for line in file:
+                        if 'reward' in line:
+                            try:
+                                val, std = map(float, line.split(':')[-1].strip().split('+/-'))
+                                reward_mean = round(val, 6)
+                                reward_std = round(std, 6)
+                            except:
+                                pass
+                        elif 'PE' in line:
+                            try:
+                                val, std = map(float, line.split(':')[-1].strip().split('+/-'))
+                                pe_mean = round(val, 6)
+                                pe_std = round(std, 6)
+                                pe_percent_mean = round(val * 100, 2)
+                                pe_percent_std = round(std * 100, 2)
+                            except:
+                                pass
 
-        order3= int(x.split('-h')[1].split('-')[0])
-
-        if '-c' in x:
-            order4 = int(x.split('-c')[1].split('-')[0])
-        else:
-            order4 = 0
-        
-        if '-n' in x:
-            order5 = int(x.split('-n')[1].split('-')[0])
-        else:
-            order5 = 0
-
-        if '-b' in x:
-            order6 = int(x.split('-b')[1].split('-')[0])
-        else:
-            order6 = 0
-
-        if '-M' in x:
-            order8 = 1
-            if '-Me' in x: 
-                order7 = int(math.pow(10, int(x.split('-Me')[1].split('-')[0])))
-            else:
-                order7 = int(x.split('-M')[1].split('-')[0]) 
-        elif '-R' in x:
-            order8 = 2
-            if '-Re' in x: 
-                order7 = int(math.pow(10, int(x.split('-Re')[1].split('-')[0])))
-            else:
-                order7 = int(x.split('-R')[1].split('-')[0])
-        else:
-            order7 = 0
-            order8 = 0
-        
-        if '-k' in x:
-            order9= int(x.split('-k')[1].split('-')[0])
-        else:
-            order9 = 0
-
-        if 'rA' in x:
-            order10 = 1
-        elif 'rC' in x:
-            order10 = 2
-        return (order1, order2, order3, order4, order5, order6, order7, order8, order9, order10)
-
-    sorted_dirs = sorted(os.listdir(dir), key=custom_key)
-    for dir_name in sorted_dirs:
-        print(dir_name)
-        eval_file_path = os.path.join(dir, dir_name, 'eval.txt')
-        if os.path.isfile(eval_file_path):
-            with open(eval_file_path, 'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    if 'reward' in line:
-                        reward = line.split(': ')[-1]
-                    if 'PE' in line:
-                        PE = line.split(': ')[-1]
-            result = [dir_name.split('2DBpp-')[-1], reward, PE]
-            writer.writerow(result)
+                dir_name = os.path.basename(dirpath)
+                result = [
+                    dir_name,
+                    reward_mean, reward_std,
+                    pe_mean, pe_std,
+                    pe_percent_mean, pe_percent_std
+                ]
+                writer.writerow(result)
+    logging.info(f"Complete writing test results into {save_filename}.")
 
 
-def update_yaml_files(dir):
+def update_yaml_files(root_dir: str) -> None:
     """
-    update the YAML files according to the filename
+    根據 YAML 文件的名稱更新 YAML 文件的內容。
     """
-    for filename in os.listdir(dir):
-        if filename.endswith(".yaml"):  # 確保處理的是YAML文件
-            filepath = os.path.join(dir, filename)
+    for filename in os.listdir(root_dir):
+        if filename.endswith(".yaml"):
+            filepath = os.path.join(root_dir, filename)
             with open(filepath, 'r') as file:
-                data = yaml.load(file, Loader=yaml.UnsafeLoader)  # 讀取YAML文件
-
-            if "-F" in filename:
-                data['PPO_kwargs']['add_invalid_probs'] = False
-            else:
-                data['PPO_kwargs']['add_invalid_probs'] = True
+                data = yaml.load(file, Loader=yaml.UnsafeLoader)  # 要用 UnsafeLoader
                 
             if "v" in filename:
                 if "v1" in filename:
@@ -107,9 +82,7 @@ def update_yaml_files(dir):
                     data['total_timesteps'] = 3000000
                     data['env_kwargs']['min_items_per_bin'] = 10
                     data['env_kwargs']['max_items_per_bin'] = 20
-                    if "atten1" in filename: 
-                        data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
-                    elif "transform" in filename:
+                    if "transform" in filename:
                         version = filename.split('transform')[1].split('_')[0]
                         data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
@@ -119,9 +92,7 @@ def update_yaml_files(dir):
                     data['total_timesteps'] = 6000000
                     data['env_kwargs']['min_items_per_bin'] = 15
                     data['env_kwargs']['max_items_per_bin'] = 25
-                    if "atten1" in filename: 
-                        data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
-                    elif "transform" in filename:
+                    if "transform" in filename:
                         version = filename.split('transform')[1].split('_')[0]
                         data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
@@ -131,25 +102,11 @@ def update_yaml_files(dir):
                     data['total_timesteps'] = 12500000
                     data['env_kwargs']['min_items_per_bin'] = 20
                     data['env_kwargs']['max_items_per_bin'] = 30
-                    if "atten1" in filename: 
-                        data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
-                    elif "transform" in filename:
+                    if "transform" in filename:
                         version = filename.split('transform')[1].split('_')[0]
                         data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
                     else:
                         data['policy_kwargs']['network'] = "CnnMlpNetwork3"
-                elif "v4" in filename:
-                    data['env_id'] = '2DBpp-v4'
-                    data['total_timesteps'] = 12500000
-                    data['env_kwargs']['min_items_per_bin'] = 20
-                    data['env_kwargs']['max_items_per_bin'] = 30
-                    if "atten1" in filename:
-                        data['policy_kwargs']['network'] = "CnnAttenMlpNetwork1_v1"
-                    elif "transform" in filename:
-                        version = filename.split('transform')[1].split('_')[0]
-                        data['policy_kwargs']['network'] = f"TransfromerNetwork{version}"
-                    else:
-                        data['policy_kwargs']['network'] = "CnnMlpNetwork4"
             else:
                 print("Lack of environment version!\n")
                 return
@@ -221,6 +178,11 @@ def update_yaml_files(dir):
             else:
                 data['policy_kwargs']['mask_type'] = 'truth'
 
+            if "-F" in filename:
+                data['PPO_kwargs']['add_invalid_probs'] = False
+            else:
+                data['PPO_kwargs']['add_invalid_probs'] = True
+
             if "transform" in filename:
                 str1 = filename.split('transform')[1].split('-')[0]
                 version = str1[0]
@@ -241,98 +203,20 @@ def update_yaml_files(dir):
                 data['policy_kwargs']['network_kwargs']['transformer_kwargs']['norm_first'] = False
                 if version in ['1', '2']:
                     data['policy_kwargs']['network_kwargs']['num_layers'] = num_layers
-                elif version in ['3', '4']:
+                elif version in ['3']:
                     data['policy_kwargs']['network_kwargs']['transformer_kwargs']['num_encoder_layers'] = num_layers
                     data['policy_kwargs']['network_kwargs']['transformer_kwargs']['num_decoder_layers'] = num_layers
-
 
             # update the YAML file
             with open(filepath, 'w') as file:
                 yaml.dump(data, file, sort_keys=False)
 
 
-def copy_file1(dir: str) -> None: 
-    import shutil
-    source_file = "main/v1_PPO-h200-c02-n64-b32-R15-atten1FT64T-atten1FT64T-k1-rA.yaml"
-    destination_files = [
-        "v1_PPO-h200-c02-n64-b32-M0-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-M7-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-M30-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-M50-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-M100-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-M500-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me3-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me4-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me5-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me6-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me7-atten1FT64T-k1-rA.yaml",
-        "v1_PPO-h200-c02-n64-b32-Me8-atten1FT64T-k1-rA.yaml",
-    ]
-    for destination_file in destination_files:
-        shutil.copy(os.path.join(dir, source_file), os.path.join(dir, destination_file))
-
-
-def copy_file2(dir: str) -> None: 
-    import shutil
-    source_file = "main/v4_PPO-h1600-c02-n64-b32-R15-atten1FT64T-k1-rA.yaml"
-    destination_files = [
-        "v4_PPO-h1600-c02-n64-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h1600-c02-n64-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h1600-c02-n128-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h1600-c02-n128-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h1600-c04-n64-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h1600-c04-n64-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h1600-c04-n128-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h1600-c04-n128-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h3200-c02-n64-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h3200-c02-n64-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h3200-c02-n128-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h3200-c02-n128-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h3200-c04-n64-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h3200-c04-n64-b64-R15-atten1FT64T-k5-rA.yaml",
-        "v4_PPO-h3200-c04-n128-b32-R15-atten1FT64T-k1-rA.yaml",
-        "v4_PPO-h3200-c04-n128-b64-R15-atten1FT64T-k5-rA.yaml",
-    ]
-    for destination_file in destination_files:
-        shutil.copy(os.path.join(dir, source_file), os.path.join(dir, destination_file))
-
-
-def __plot_mask_diff_strategy_coef(location, title: str, acc_replace: list, acc_minus: list):
-    x_labels = ["0", "7", "15", "30", "50", "100", "500", "1.0E+03", "1.0E+04", "1.0E+05", "1.0E+06", "1.0E+07", "1.0E+08"]
-    x_positions = np.arange(len(x_labels))
-    y_replace = acc_replace
-    y_minus = acc_minus
-    plt.subplot(location)
-    plt.plot(x_positions, y_replace, marker='o', markersize=8, label="Replace", color='red')
-    plt.plot(x_positions, y_minus, marker='^', markersize=8, label="Minus", color='royalblue')
-    plt.title(title, fontsize=16)
-    plt.xlabel("coefficient", fontsize=12)
-    plt.ylabel("PE", fontsize=12)
-    plt.xticks(x_positions, x_labels, rotation=45)
-    plt.legend()
-    plt.tight_layout()
-    
-
-def plot_all_mask_diff_strategy_coef():
-    plt.figure(figsize=(12, 8))
-    replace_40x40 = [80, 85, 85, 84, 83, 83, 82, 82, 82, 82, 82, 82, 82]
-    minus_40x40 = [0, 50, 80, 85, 85, 85, 85, 83, 83, 81, 78, 75, 73]
-    __plot_mask_diff_strategy_coef(221, "(a) 10 x 10", replace_40x40, minus_40x40)
-    replace_40x40 = [80, 85, 85, 84, 83, 83, 82, 82, 82, 82, 82, 82, 82]
-    minus_40x40 = [0, 50, 80, 85, 85, 85, 85, 83, 83, 81, 78, 75, 73]
-    __plot_mask_diff_strategy_coef(222, "(b) 20 x 20", replace_40x40, minus_40x40)
-    replace_40x40 = [80, 85, 85, 84, 83, 83, 82, 82, 82, 82, 82, 82, 82]
-    minus_40x40 = [0, 50, 80, 85, 85, 85, 85, 83, 83, 81, 78, 75, 73]
-    __plot_mask_diff_strategy_coef(223, "(c) 40 x 40", replace_40x40, minus_40x40)
-    replace_40x40 = [80, 85, 85, 84, 83, 83, 82, 82, 82, 82, 82, 82, 82]
-    minus_40x40 = [0, 50, 80, 85, 85, 85, 85, 83, 83, 81, 78, 75, 73]
-    __plot_mask_diff_strategy_coef(224, "(d) 32 x 50", replace_40x40, minus_40x40)
-    plt.savefig(f"img/PE_diff_mask_type_coef.png")
-
-
 def plot_training_curve_pe(
+    ax: axes.Axes, 
     dirs: dict[str, str], 
-    title: str, 
+    metric_name: str = 'ep_PE_mean',
+    title: str = '10x10', 
     xlabel: str = 'Steps',
     ylabel: str = 'Avg Packing Efficiency',
     plot_moving_average: bool = True, 
@@ -343,13 +227,13 @@ def plot_training_curve_pe(
     Plot the training curve of packing efficiency from multiple metrics files, with option for raw or moving average.
 
     Args:
+        ax: Matplotlib axis object to plot on.
         dirs (dict): Dictionary mapping labels to log paths.
         title (str): Title of the plot.
         use_moving_average (bool): If True, plot moving average; if False, plot raw values.
         window_size (int): Window size for moving average calculation.
     """
-    plt.figure(figsize=(10, 6))
-    colors = plt.cm.tab10(np.linspace(0, 1, len(dirs)))  # Generate distinct colors
+    colors = ['r', 'b', 'g', 'purple', 'orange', 'gray', 'magenta', 'olive', 'c', 'lime']  
 
     for idx, (label, log_file) in enumerate(dirs.items()):
         if not os.path.exists(log_file):
@@ -357,25 +241,243 @@ def plot_training_curve_pe(
             continue
 
         df = pd.read_csv(log_file)
-        df = df.dropna(subset=['timesteps', 'ep_PE_mean'])
+        df = df.dropna(subset=['timesteps', metric_name])
         df['timesteps'] = pd.to_numeric(df['timesteps'], errors='coerce')
-        df['ep_PE_mean'] = pd.to_numeric(df['ep_PE_mean'], errors='coerce')
+        df[metric_name] = pd.to_numeric(df[metric_name], errors='coerce')
         df = df.dropna()
 
         timesteps = df['timesteps'].values
-        ep_pe_mean = df['ep_PE_mean'].values
+        ep_pe_mean = df[metric_name].values
 
         if plot_moving_average:
             ep_pe_mean_ma = np.convolve(ep_pe_mean, np.ones(window_size)/window_size, mode='valid')
             timesteps_ma = timesteps[window_size-1:]
-            plt.plot(timesteps_ma, ep_pe_mean_ma, label=label, color=colors[idx], linewidth=2)
-        
+            ax.plot(timesteps_ma, ep_pe_mean_ma, label=label, color=colors[idx], linewidth=1.5)        
         if plot_raw:
-            plt.plot(timesteps, ep_pe_mean, color=colors[idx], linewidth=1.5, alpha=0.2)
+            ax.plot(timesteps, ep_pe_mean, color=colors[idx], linewidth=1.5, alpha=0.17)
 
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.grid(True)
-    plt.legend()
-    plt.savefig(f"{title.replace(' ', '_')}_{ylabel.replace(' ', '_')}.png")
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid(True)
+
+
+def plot_training_curves_3subplots(
+    dirs_dict: dict, 
+    metric_name: str = 'ep_PE_mean',
+    xlabel: str = 'Steps',
+    ylabel: str = 'Avg Packing Efficiency',
+    plot_moving_average: bool = True, 
+    plot_raw: bool = True,
+    window_size: int = 100,
+    legend_loc: str = 'upper center',
+    save_name: str = "training_curves.png",
+) -> None:
+    """
+    Plot training curves for different grid sizes in a 2x2 subplot grid.
+
+    Args:
+        dirs_dict (dict): Dictionary mapping grid sizes to their dirs dictionaries.
+        base_title (str): Base title for the figure.
+        window_size (int): Window size for moving average calculation.
+    """
+    fig, axs = plt.subplots(1, 3, figsize=(20, 6), sharex=False, sharey=False)
+    axs = axs.flatten()  # Flatten the 1x3 array for easy iteration
+
+    for ax, (bin_size, dirs) in zip(axs, dirs_dict.items()):
+        if dirs:
+            plot_training_curve_pe(
+                ax, dirs, 
+                metric_name=metric_name,
+                title=str(bin_size),
+                xlabel=xlabel,
+                ylabel= ylabel,
+                plot_moving_average=plot_moving_average, 
+                plot_raw=plot_raw, 
+                window_size=window_size,
+            )
+    handles, labels = axs[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc=legend_loc, bbox_to_anchor=(0.5, 1), ncols=len(list(dirs_dict.values())[0]), fontsize=12, edgecolor='#555')
+    # plt.tight_layout(pad=1.15)
+    plt.subplots_adjust(left=0.05, right=0.97, top=0.86, wspace=0.17)
+    plt.savefig(save_name)
+    plt.close()
+    
+
+def plot_compare_algo():
+    compare_algo = {
+        "10x10" : {
+            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "Zhao-2D": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-P/metrics.csv",
+            "Deep-Pack": "backup/compare/2DBpp-v1_deeppack_DDQN-h200-rC/metrics.csv",
+            "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
+            "Deep-Pack-truth": "backup/compare/2DBpp-v1_deeppack_mask_DDQN-h200-rC/metrics.csv",
+ 
+        }, 
+        "20x20" : {
+            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "Zhao-2D": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-P/metrics.csv",
+            "Deep-Pack": "backup/compare/2DBpp-v2_deeppack_DDQN-h400-rC/metrics.csv",
+            "Zhao-2D-truth": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-T/metrics.csv",
+            "Deep-Pack-truth": "backup/compare/2DBpp-v2_deeppack_mask_DDQN-h400-rC/metrics.csv",
+        },
+        "40x40" : {
+            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "Zhao-2D": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-P/metrics.csv",
+            "Deep-Pack": "backup/compare/2DBpp-v3_deeppack_DDQN-h1600-rC/metrics.csv",
+            "Zhao-2D-truth": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-T/metrics.csv",
+            "Deep-Pack-truth": "backup/compare/2DBpp-v3_deeppack_mask_DDQN-h1600-rC/metrics.csv",
+        },
+    }
+    
+    plot_training_curves_3subplots(
+        compare_algo, 
+        metric_name='ep_PE_mean',
+        ylabel='Avg Packing Efficiency',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Packing Efficiency for Different Algorithms.png"
+    )
+    
+    plot_training_curves_3subplots(
+        compare_algo, 
+        metric_name='loss',
+        ylabel='Avg Total Loss',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Loss for Different Algorithms.png"
+    )
+
+
+def plot_cnn_net():
+    compare_cnn_net = {
+        "10x10" : {
+            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
+            # "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
+        }, 
+        "20x20" : {
+            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaC": "backup/cnn_net/2DBpp-v2_PPO-h400-c02-n64-b32-R15-k1-rA/metrics.csv",
+            # "Zhao-2D-truth": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-T/metrics.csv",
+        },
+        "40x40" : {
+            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaC": "backup/cnn_net/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-k1-rA/metrics.csv",
+            # "Zhao-2D-truth": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-T/metrics.csv",
+        },
+    }
+    
+    plot_training_curves_3subplots(
+        compare_cnn_net, 
+        metric_name='ep_PE_mean',
+        ylabel='Avg Packing Efficiency',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Packing Efficiency for using CNN.png"
+    )
+    
+    plot_training_curves_3subplots(
+        compare_cnn_net, 
+        metric_name='loss',
+        ylabel='Avg Total Loss',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Loss for using CNN.png"
+    )
+
+
+def plot_compare_diff_reward_func():
+    diff_reward_func = {
+        "10x10" : {
+            "PaT (area)":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+        }, 
+        "20x20" : {
+            "PaT (area)":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+        },
+        "40x40" : {
+            "PaT (area)":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+        },
+    }
+    
+    plot_training_curves_3subplots(
+        diff_reward_func, 
+        metric_name='ep_PE_mean',
+        ylabel='Avg Packing Efficiency',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Packing Efficiency for Different Reward Functions.png"
+    )
+    
+    plot_training_curves_3subplots(
+        diff_reward_func, 
+        metric_name='loss',
+        ylabel='Avg Total Loss',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Loss for Different Reward Functions.png"
+    )
+
+
+def plot_without_decoder():
+    without_decoder = {
+        "10x10" : {
+            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+        }, 
+        "20x20" : {
+            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+        },
+        "40x40" : {
+            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+        },
+    }
+    
+    plot_training_curves_3subplots(
+        without_decoder, 
+        metric_name='ep_PE_mean',
+        ylabel='Avg Packing Efficiency',
+        window_size=100, 
+        legend_loc='lower right',
+        save_name="fig/Training Curves of Packing Efficiency for Without Transformer Decoder.png"
+    )
+    
+    plot_training_curves_3subplots(
+        without_decoder, 
+        metric_name='loss',
+        ylabel='Avg Total Loss',
+        window_size=100, 
+        save_name="fig/Training Curves of Loss for Without Transformer Decoder.png"
+    )
+
+
+
+
+if __name__ == "__main__":
+    # $ tensorboard --logdir backup
+    if not os.path.exists("fig"):
+        os.makedirs("fig")
+    
+    ''' Example usage of formatted_result '''
+    # formatted_result(root_dir='backup')
+    
+    ''' Example usage of updating YAML files according to filename '''
+    # update_yaml_files(root_dir='settings/main')
+
+    ''' Plot training curves for different algorithms '''
+    plot_compare_algo()
+
+    ''' Plot training curves for using CNN network '''
+    plot_cnn_net()
+    
+    ''' Plot training curves for different reward functions '''
+    plot_compare_diff_reward_func()
+    
+    ''' Plot training curves for without decoder '''
+    plot_without_decoder()
+    
