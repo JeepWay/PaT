@@ -3,8 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gymnasium as gym
 from envs.register import registration_envs
-from mask_pack import PPO
-from mask_pack.common.constants import BIN
+import pat
+from pat import PPO
+from pat.common.constants import BIN
+import sys
+sys.modules['mask_pack'] = pat
 import os
 import logging
 import warnings
@@ -15,7 +18,6 @@ os.makedirs("fig", exist_ok=True)
 os.makedirs("fig/10x10", exist_ok=True)
 os.makedirs("fig/20x20", exist_ok=True)
 os.makedirs("fig/40x40", exist_ok=True)
-os.makedirs("fig/32x50", exist_ok=True)
 registration_envs()
 seed = 10
 
@@ -58,41 +60,26 @@ env_kwargs_40x40 = {
     "reward_type": "area"
 }
 
-env_kwargs_32x50 = {
-    "render_mode": "human",
-    "bin_channels": 3,
-    "min_items_per_bin": 20,
-    "max_items_per_bin": 30,
-    "area_reward_coef": 0.4,
-    "constant_penalty": -5.0,
-    "action_fail": "continue",
-    "reward_type": "area"
-}
 
+# 可以把以下權重路徑替換成新的其他權重路徑
 args = [
     {
         "label": "10x10",
-        "weight_path": "save_weight/2DBpp-v1_PPO-h200-c02-n64-b32-R15-atten1FF256T-k1-rA/2DBpp-v1.zip",
+        "weight_path": "save_weight/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/2DBpp-v1.zip",
         "env_id": "2DBpp-v1",
         "env_kwargs": env_kwargs_10x10,
     },
     {
         "label": "20x20",
-        "weight_path": "save_weight/2DBpp-v2_PPO-h400-c02-n64-b32-R15-atten1FF256T-k1-rA/2DBpp-v2.zip",
+        "weight_path": "save_weight/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/2DBpp-v2.zip",
         "env_id": "2DBpp-v2",
         "env_kwargs": env_kwargs_20x20,
     },
     {
         "label": "40x40",
-        "weight_path": "save_weight/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-atten1FF256T-k1-rA/2DBpp-v3.zip",
+        "weight_path": "save_weight/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/2DBpp-v3.zip",
         "env_id": "2DBpp-v3",
         "env_kwargs": env_kwargs_40x40,
-    },
-    {
-        "label": "32x50",
-        "weight_path": "None",
-        "env_id": "2DBpp-v4",
-        "env_kwargs": env_kwargs_32x50,
     },
 ]
 
@@ -331,7 +318,7 @@ with gr.Blocks() as demo:
             
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="2D Mask BPP with PPO and ACKTR")
-    parser.add_argument('--launch', action='store_true', default=False, help="Launch the UI.")
+    parser = argparse.ArgumentParser(description="2D Bin Packing Environment")
+    parser.add_argument('--share', action='store_true', default=False, help="Whether to share the Gradio app publicly. Default is False.")
     args = parser.parse_args()
-    demo.launch(share=args.launch)
+    demo.launch(share=args.share)
