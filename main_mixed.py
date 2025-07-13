@@ -17,6 +17,11 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import get_system_info
 from stable_baselines3.common.monitor import Monitor
 
+import sys
+import pat
+# the previous version of the package is named `mask_pack`, but now it is `pat`
+sys.modules['mask_pack'] = pat 
+
 from envs.register import registration_envs
 from pat import PPO
 from pat.common.evaluation import evaluate_policy
