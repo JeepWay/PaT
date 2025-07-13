@@ -14,7 +14,7 @@ from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import PyTorchObs, Schedule
 from stable_baselines3.common.distributions import Distribution
 
-from mask_pack.common.torch_layers import (
+from pat.common.torch_layers import (
     BaseNetwork,
     CnnMlpNetwork1, 
     CnnMlpNetwork2, 
@@ -22,12 +22,12 @@ from mask_pack.common.torch_layers import (
     TransfromerNetwork1,
     TransfromerNetwork3,
 )
-from mask_pack.common.preprocessing import preprocess_obs
-from mask_pack.common.distributions import (
+from pat.common.preprocessing import preprocess_obs
+from pat.common.distributions import (
     CategoricalDistribution, 
     make_proba_distribution,
 )
-from mask_pack.common.constants import BIN, MASK
+from pat.common.constants import BIN, MASK
 
 class CustomActorCriticPolicy(BasePolicy):
     """

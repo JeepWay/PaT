@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import label
 
-from mask_pack.common.constants import BIN, MASK
+from pat.common.constants import BIN, MASK
 from envs.bpp.creator import ItemsCreator
 from envs.bpp.bin import Bin
 

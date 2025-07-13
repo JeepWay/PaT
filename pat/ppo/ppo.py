@@ -12,10 +12,10 @@ from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticP
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance
 
-from mask_pack.common.buffers import RolloutBuffer
-from mask_pack.common.on_policy_algorithm import OnPolicyAlgorithm
-from mask_pack.common.policies import CustomActorCriticPolicy
-from mask_pack.common.utils import get_schedule_fn
+from pat.common.buffers import RolloutBuffer
+from pat.common.on_policy_algorithm import OnPolicyAlgorithm
+from pat.common.policies import CustomActorCriticPolicy
+from pat.common.utils import get_schedule_fn
 
 SelfPPO = TypeVar("SelfPPO", bound="PPO")
 

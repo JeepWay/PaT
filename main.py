@@ -16,9 +16,9 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import get_system_info
 
 from envs.register import registration_envs
-from mask_pack import PPO
-from mask_pack.common.evaluation import evaluate_policy
-from mask_pack.common.callbacks import MetricsCallback
+from pat import PPO
+from pat.common.evaluation import evaluate_policy
+from pat.common.callbacks import MetricsCallback
 
 
 def train(config: Dict[str, Any]):

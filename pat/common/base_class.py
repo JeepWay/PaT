@@ -41,7 +41,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.vec_env.patch_gym import _convert_space, _patch_env
 
-from mask_pack.common.utils import get_schedule_fn, set_random_seed
+from pat.common.utils import get_schedule_fn, set_random_seed
 
 SelfBaseAlgorithm = TypeVar("SelfBaseAlgorithm", bound="BaseAlgorithm")
 

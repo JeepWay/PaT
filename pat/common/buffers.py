@@ -6,11 +6,11 @@ import numpy as np
 import torch as th
 from gymnasium import spaces
 
-from mask_pack.common.type_aliases import (
+from pat.common.type_aliases import (
     DictRolloutBufferSamples,
     RolloutBufferSamples,
 )
-from mask_pack.common.constants import BIN, MASK
+from pat.common.constants import BIN, MASK
 from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3.common.buffers import BaseBuffer
 

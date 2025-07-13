@@ -16,11 +16,11 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedul
 from stable_baselines3.common.utils import obs_as_tensor, safe_mean
 from stable_baselines3.common.vec_env import VecEnv
 
-from mask_pack.common.buffers import RolloutBuffer, DictRolloutBuffer
-from mask_pack.common.policies import CustomActorCriticPolicy
-from mask_pack.common.constants import BIN, MASK, PE
-from mask_pack.common.base_class import BaseAlgorithm
-from mask_pack.common.callbacks import MetricsCallback
+from pat.common.buffers import RolloutBuffer, DictRolloutBuffer
+from pat.common.policies import CustomActorCriticPolicy
+from pat.common.constants import BIN, MASK, PE
+from pat.common.base_class import BaseAlgorithm
+from pat.common.callbacks import MetricsCallback
 
 SelfOnPolicyAlgorithm = TypeVar("SelfOnPolicyAlgorithm", bound="OnPolicyAlgorithm")
 

@@ -11,7 +11,7 @@ from stable_baselines3.common.vec_env.base_vec_env import VecEnv, VecEnvIndices,
 from stable_baselines3.common.vec_env.patch_gym import _patch_env
 from stable_baselines3.common.vec_env.util import copy_obs_dict, dict_to_obs, obs_space_info
 
-from mask_pack.common.constants import BIN, MASK
+from pat.common.constants import BIN, MASK
 
 class CustomDummyVecEnv(VecEnv):
     """
