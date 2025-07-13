@@ -1,0 +1,19 @@
+# # PyTorch CPU
+# torch==2.4.1+cpu
+# torchvision==0.19.1+cpu
+# torchaudio==2.4.1+cpu
+# --extra-index-url https://download.pytorch.org/whl/cpu
+
+# PyTorch GPU：
+torch==2.4.1+cu118
+torchvision==0.19.1+cu118
+torchaudio==2.4.1+cu118
+--extra-index-url https://download.pytorch.org/whl/cu118
+
+stable-baselines3[extra]==2.3.2
+tensorboard==2.18.0
+pyyaml==6.0.2
+scipy==1.13.0
+wandb==0.18.7
+numpy==1.26.3
+gradio==4.44.1
