@@ -194,31 +194,9 @@ class CustomActorCriticPolicy(BasePolicy):
             module_gains = {
                 self.network.actor_net: 0.01,
                 self.network.critic_net: 1,
+                self.network.mask_net: 0.01,
             }
-            if self.network.share_extractor is not None:
-                module_gains[self.network.share_extractor] = np.sqrt(2)
-
-            if self.network.mask_net is not None:
-                module_gains[self.network.mask_net] = 0.01
-
-            if self.network.attention is not None:
-                module_gains[self.network.attention] = np.sqrt(2)
-
-            if self.network.mask_extractor is not None:
-                module_gains[self.network.mask_extractor] = np.sqrt(2)
-                module_gains[self.network.actor_extractor] = np.sqrt(2)
-                module_gains[self.network.critic_extractor] = np.sqrt(2)
-
-            if self.network.transformer_encoder is not None:
-                module_gains[self.network.transformer_encoder] = np.sqrt(2)
-                module_gains[self.network.l1] = np.sqrt(2)
-                
-            if self.network.transformer is not None:
-                module_gains[self.network.transformer] = np.sqrt(2)
-                module_gains[self.network.l1] = np.sqrt(2)
-                module_gains[self.network.l2] = np.sqrt(2)
-                if self.network.l3 is not None:
-                    module_gains[self.network.l3] = np.sqrt(2)
+            module_gains.update(self.network.get_init_module_gains())
 
             for module, gain in module_gains.items():
                 module.apply(partial(self.init_weights, gain=gain))

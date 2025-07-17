@@ -6,6 +6,7 @@ from gymnasium import spaces
 from torch import nn
 from torch.nn import functional as F
 import math
+import numpy as np
 
 class CustomMaxPool(nn.Module):
     def __init__(self, dim=1):
@@ -185,26 +186,13 @@ class BaseNetwork(nn.Module):
         self.share_input_channels = observation_space.shape[0]
 
         # to be defined in the subclasses 
-        self.share_extractor: nn.Sequential = None
-        self.attention: SingleHeadAttention = None
-        self.positional_encoding: ImplicitPositionalEncoding = None
-        self.mask_net: nn.Sequential = None
         self.actor_net: nn.Sequential = None
         self.critic_net: nn.Sequential = None
+        self.mask_net: nn.Sequential = None
 
-        self.mask_n_flatten: int = None
-        self.mask_extractor: nn.Sequential = None
-        self.actor_n_flatten: int = None
-        self.actor_extractor: nn.Sequential = None
-        self.critic_n_flatten: int = None
-        self.critic_extractor: nn.Sequential = None
+    def get_init_module_gains(self):
+        raise NotImplementedError("get_init_modules method must be implemented in the subclass")
         
-        self.l1: nn.Linear = None
-        self.l2: nn.Linear = None
-        self.l3: nn.Linear = None
-        self.transformer_encoder: nn.TransformerEncoder = None
-        self.transformer: nn.Transformer = None
-
     def forward(self, observations: th.Tensor, 
                 interest_mask: th.Tensor = None
     ) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
@@ -291,6 +279,15 @@ class TransfromerNetwork1(BaseNetwork):
             nn.ReLU(),
             nn.Linear(self.hidden_dim//2, 1),
         )
+
+    def get_init_module_gains(self):
+        return {
+            self.transformer_encoder: np.sqrt(2),
+            self.l1: np.sqrt(2),
+            self.actor_net: 0.01,
+            self.critic_net: 1,
+            self.mask_net: 0.01,
+        }
         
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor = None):
         # src_key_padding_mask = (interest_mask == 0)
@@ -360,6 +357,16 @@ class TransfromerNetwork3(BaseNetwork):
             nn.ReLU(),
             nn.Linear(self.hidden_dim//2, 1),
         )
+
+    def get_init_module_gains(self):
+        return {
+            self.transformer: np.sqrt(2),
+            self.l1: np.sqrt(2),
+            self.l2: np.sqrt(2),
+            self.actor_net: 0.01,
+            self.critic_net: 1,
+            self.mask_net: 0.01,
+        }
         
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor):
         assert(interest_mask.shape[1] == self.action_dim, "interest_mask's shape[1] must be equal to action_dim")
@@ -470,6 +477,17 @@ class CnnMlpNetwork1(BaseNetwork):
             (nn.Linear(self.hidden_dim//2, 1))
         )
 
+    def get_init_module_gains(self):
+        return {
+            self.share_extractor: np.sqrt(2),
+            self.actor_net: 0.01,
+            self.actor_extractor: np.sqrt(2),
+            self.critic_net: 1,
+            self.critic_extractor: np.sqrt(2),
+            self.mask_net: 0.01,
+            self.mask_extractor: np.sqrt(2),
+        }
+
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor = None) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         share_features = self.share_extractor(observations)
 
@@ -576,6 +594,17 @@ class CnnMlpNetwork2(BaseNetwork):
             (nn.Linear(self.hidden_dim//2, 1))
         )
 
+    def get_init_module_gains(self):
+        return {
+            self.share_extractor: np.sqrt(2),
+            self.actor_net: 0.01,
+            self.actor_extractor: np.sqrt(2),
+            self.critic_net: 1,
+            self.critic_extractor: np.sqrt(2),
+            self.mask_net: 0.01,
+            self.mask_extractor: np.sqrt(2),
+        }
+        
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor = None) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         share_features = self.share_extractor(observations)
 
@@ -682,6 +711,17 @@ class CnnMlpNetwork3(BaseNetwork):
             (nn.Linear(self.hidden_dim//2, 1))
         )
 
+    def get_init_module_gains(self):
+        return {
+            self.share_extractor: np.sqrt(2),
+            self.actor_net: 0.01,
+            self.actor_extractor: np.sqrt(2),
+            self.critic_net: 1,
+            self.critic_extractor: np.sqrt(2),
+            self.mask_net: 0.01,
+            self.mask_extractor: np.sqrt(2),
+        }
+        
     def forward(self, observations: th.Tensor, interest_mask: th.Tensor = None) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         share_features = self.share_extractor(observations)
 
