@@ -50,8 +50,10 @@ def train(config: Dict[str, Any]):
         monitor_path = os.path.join(config['save_path'], "v3")
         return Monitor(gym.make("2DBpp-v3", **config["env_kwargs"]), filename=monitor_path, **config["monitor_kwargs"])
     
-    # env_fns = [make_env_2dbpp_v3, make_env_2dbpp_v3, make_env_2dbpp_v3, make_env_2dbpp_v2, make_env_2dbpp_v2, make_env_2dbpp_v1]
+    # method 2 (mixed-111)
     env_fns = [make_env_2dbpp_v3, make_env_2dbpp_v2, make_env_2dbpp_v1]
+    # # method 3 (mixed-311)
+    # env_fns = [make_env_2dbpp_v3, make_env_2dbpp_v3, make_env_2dbpp_v3, make_env_2dbpp_v2, make_env_2dbpp_v1]
     vec_env = CustomDummyVecEnv(env_fns)
     
     if "PPO" in config['save_path']:
