@@ -3,8 +3,8 @@
 CPU_PARENT=pytorch/pytorch
 GPU_PARENT=pytorch/pytorch:2.4.1-cuda11.8-cudnn9-runtime
 
-TAG=jeepway/maskpack
-VERSION=$(cat ./mask_pack/version.txt)
+TAG=jeepway/pat
+VERSION=$(cat ./pat/version.txt)
 
 if [[ ${USE_GPU} == "True" ]]; then
   PARENT=${GPU_PARENT}
