@@ -1,9 +1,3 @@
----
-title: PaT_2D_Bin_Packing_Environment
-app_file: UI.py
-sdk: gradio
-sdk_version: 4.44.1
----
 # PaT: Transformer-based Deep Reinforcement Learning for Large-sized Online 2D Bin Packing
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JeepWay/PaT)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/JeepWay/PaT/blob/main/LICENSE)  
@@ -134,7 +128,14 @@ If you want to visualize the training results on the wandb website, you can choo
 
 If you don't have one, you can choose the first option to create a new account.
 
-If you just want to save the training results locally, you can choose the third option
+If you just want to save the training results locally, you can choose the third option.
+
+## 4.5 Watch the bin packing process (Optional)
+If you want to watch the progress of the bin packing process, you can run `UI.py` file, which provides a Gradio-based interface to visualize the bin packing process.
+
+```bash
+python UI.py
+```
 
 
 ## 5. Use docker images (Optional)
@@ -158,7 +159,7 @@ Or, use `make` command to run with the shell file
 ```bash
 make docker-run-gpu
 ```
-After executing the above command, you will enter the terminal of the docker image.
+After executing the above command, you will enter the terminal of the container.
 
 ### Run CPU images
 Run the docker CPU image
@@ -170,7 +171,7 @@ Or, use `make` command to run with the shell file
 ```bash
 make docker-run-cpu
 ```
-After executing the above command, you will enter the terminal of the docker image.
+After executing the above command, you will enter the terminal of the container.
 
 
 ## 6. Compared algorithms
