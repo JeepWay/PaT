@@ -32,10 +32,10 @@ def test(orig_config: Dict[str, Any], target_config: Dict[str, Any]):
     ep_PEs_list = []
     for i in range(target_config["n_eval_seeds"]):
         eval_env: CustomDummyVecEnv = make_vec_env(
-            env_id=orig_config["env_id"], 
+            env_id=target_config["env_id"], 
             n_envs=1, 
-            seed=int(orig_config["eval_seed"] + i*10), 
-            env_kwargs=orig_config["env_kwargs"],
+            seed=int(target_config["eval_seed"] + i*10), 
+            env_kwargs=target_config["env_kwargs"],
             vec_env_cls=CustomDummyVecEnv,
         )
         # must pass config["PPO_kwargs"] to reset the `self.clip_range` to the constant
