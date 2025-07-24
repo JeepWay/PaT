@@ -21,6 +21,15 @@ from pat.common.torch_layers import (
     CnnMlpNetwork3, 
     TransfromerNetwork1,
     TransfromerNetwork3,
+    HybridNetwork1_1,
+    HybridNetwork1_2,
+    HybridNetwork1_3,
+    HybridNetwork1_3_2,
+    HybridNetwork1_3_3,
+    HybridNetwork1_3_4,
+    HybridNetwork1_4,
+    HybridNetwork1_5,
+    HybridNetwork1_5_2,
 )
 from pat.common.preprocessing import preprocess_obs
 from pat.common.distributions import (
@@ -67,6 +76,15 @@ class CustomActorCriticPolicy(BasePolicy):
         "CnnMlpNetwork3": CnnMlpNetwork3,
         "TransfromerNetwork1": TransfromerNetwork1,
         "TransfromerNetwork3": TransfromerNetwork3,
+        "HybridNetwork1_1": HybridNetwork1_1,
+        "HybridNetwork1_2": HybridNetwork1_2,
+        "HybridNetwork1_3": HybridNetwork1_3,
+        "HybridNetwork1_3_2": HybridNetwork1_3_2,
+        "HybridNetwork1_3_3": HybridNetwork1_3_3,
+        "HybridNetwork1_3_4": HybridNetwork1_3_4,
+        "HybridNetwork1_4": HybridNetwork1_4,
+        "HybridNetwork1_5": HybridNetwork1_5,
+        "HybridNetwork1_5_2": HybridNetwork1_5_2,
     }
 
     def __init__(
