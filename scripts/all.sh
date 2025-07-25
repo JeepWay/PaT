@@ -31,13 +31,13 @@ python main_general.py --orig_config_path settings/main/v2_PPO-h400-c02-n64-b32-
 
 # Generalization Mechanism (mixed training and testing)
 python main_mixed.py --config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml    # method 2
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v1_10000.yaml
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v2_10000.yaml
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v3_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v1_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v2_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-111.yaml --target_config_path settings/general/v3_10000.yaml
 python main_mixed.py --config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml    # method 3
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v1_10000.yaml
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v2_10000.yaml
-python main_general.py --orig_config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v3_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v1_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v2_10000.yaml
+python main_general.py --orig_config_path settings/mixed/v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T-mixed-311.yaml --target_config_path settings/general/v3_10000.yaml
 
 
 # Multi layer for Transformer (2 layers)
@@ -84,4 +84,15 @@ python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re6-
 python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 python main.py --config_path settings/mask_replace/v3_PPO-h1600-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 
+
+# Hybrid network (CNN + Transformer)
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-1_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-2_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-3_TF,64,4,256,0,1-k1-rA-T.yaml
+python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-2_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-3_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-4_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-4_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-5_TF,64,4,256,0,1-k1-rA-T.yaml
+# python main.py --config_path settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-5-2_TF,64,4,256,0,1-k1-rA-T.yaml
 

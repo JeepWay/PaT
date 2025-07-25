@@ -37,7 +37,7 @@ policy_kwargs: &id001
   dist_kwargs:
     mask_strategy: replace
     mask_minus_coef: 15
-    mask_replace_coef: -15
+    mask_replace_coef: -7
     update_actor_stratrgy: masked
     entropy_strategy: naive
     invalid_probs_strategy: naive
