@@ -72,6 +72,7 @@ pip install -r requirements.txt
 └── utils.py               # Functions to format result, update .yaml files, and plot training curves.
 ```
 
+
 ## 4. Usage example
 ### 4.1 Run the main methods with configuration files
 All experiment configuration files (.yaml) are organized under the [/settings](/settings/) directory, categorized by different network types (e.g., main, hybrid_net, multi_layer, cnn_net, etc.).
@@ -99,7 +100,7 @@ You can choose to run the training, testing, or both modes by adding the `--mode
 For example, if you want to run the testing mode, you can execute the following command:
 
 ```bash
-python main.py --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml --mode test
+python main.py --mode test --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
 ```
 
 ### 4.3 Watch the training process in tensorboard (Optional)
@@ -130,13 +131,14 @@ If you don't have one, you can choose the first option to create a new account.
 
 If you just want to save the training results locally, you can choose the third option.
 
-## 4.5 Watch the bin packing process (Optional)
+### 4.5 Visualize the bin packing process (Optional)
 If you want to watch the progress of the bin packing process, you can run `UI.py` file, which provides a Gradio-based interface to visualize the bin packing process.
 
 ```bash
 python UI.py
 ```
 
+There is also an online demo hosted on Hugging Face Spaces, running on a free CPU. You can try it out [here](https://huggingface.co/spaces/JeepWay/PaT_2D_Bin_Packing_Environment).
 
 ## 5. Use docker images (Optional)
 ### Build docker image
