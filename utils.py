@@ -233,7 +233,7 @@ def plot_training_curve_pe(
         use_moving_average (bool): If True, plot moving average; if False, plot raw values.
         window_size (int): Window size for moving average calculation.
     """
-    colors = ['r', 'b', 'g', 'purple', 'orange', 'gray', 'magenta', 'olive', 'c', 'lime']  
+    colors = ['r', 'b', 'g', 'orange', 'purple', 'hotpink', 'grey', 'greenyellow', 'aqua', 'skyblue', 'gold', 'olive']  
 
     for idx, (label, log_file) in enumerate(dirs.items()):
         if not os.path.exists(log_file):
@@ -262,6 +262,86 @@ def plot_training_curve_pe(
     ax.grid(True)
 
 
+def plot_training_curves_1subplots(
+    dirs_dict: dict, 
+    metric_name: str = 'ep_PE_mean',
+    xlabel: str = 'Steps',
+    ylabel: str = 'Avg Packing Efficiency',
+    plot_moving_average: bool = True, 
+    plot_raw: bool = True,
+    window_size: int = 100,
+    legend_loc: str = 'upper center',
+    save_name: str = "training_curves.png",
+) -> None:
+    """
+    Plot training curves for different grid sizes in a 1x1 subplot grid.
+
+    Args:
+        dirs_dict (dict): Dictionary mapping grid sizes to their dirs dictionaries.
+        base_title (str): Base title for the figure.
+        window_size (int): Window size for moving average calculation.
+    """
+    fig, axs = plt.subplots(1, 1, figsize=(10, 6), sharex=False, sharey=False)
+    bin_size, dirs = list(dirs_dict.items())[0]
+    plot_training_curve_pe(
+        axs, dirs, 
+        metric_name=metric_name,
+        title=str(bin_size),
+        xlabel=xlabel,
+        ylabel= ylabel,
+        plot_moving_average=plot_moving_average, 
+        plot_raw=plot_raw, 
+        window_size=window_size,
+    )
+    handles, labels = axs.get_legend_handles_labels()
+    # fig.legend(handles, labels, loc=legend_loc, bbox_to_anchor=(0.5, 1), ncols=len(list(dirs_dict.values())[0]), fontsize=12, edgecolor='#555')
+    fig.legend(handles, labels, loc=legend_loc, bbox_to_anchor=(0.5, 1), ncols=min(len(list(dirs_dict.values())[0]), 7), fontsize=12, edgecolor='#555')
+    plt.savefig(save_name)
+    plt.close()
+    
+
+def plot_training_curves_2subplots(
+    dirs_dict: dict, 
+    metric_name: str = 'ep_PE_mean',
+    xlabel: str = 'Steps',
+    ylabel: str = 'Avg Packing Efficiency',
+    plot_moving_average: bool = True, 
+    plot_raw: bool = True,
+    window_size: int = 100,
+    legend_loc: str = 'upper center',
+    save_name: str = "training_curves.png",
+) -> None:
+    """
+    Plot training curves for different grid sizes in a 1x2 subplot grid.
+
+    Args:
+        dirs_dict (dict): Dictionary mapping grid sizes to their dirs dictionaries.
+        base_title (str): Base title for the figure.
+        window_size (int): Window size for moving average calculation.
+    """
+    fig, axs = plt.subplots(1, 2, figsize=(20, 6), sharex=False, sharey=False)
+    axs = axs.flatten()  # Flatten the 1x2 array for easy iteration
+
+    for ax, (bin_size, dirs) in zip(axs, dirs_dict.items()):
+        if dirs:
+            plot_training_curve_pe(
+                ax, dirs, 
+                metric_name=metric_name,
+                title=str(bin_size),
+                xlabel=xlabel,
+                ylabel= ylabel,
+                plot_moving_average=plot_moving_average, 
+                plot_raw=plot_raw, 
+                window_size=window_size,
+            )
+    handles, labels = axs[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc=legend_loc, bbox_to_anchor=(0.5, 1), ncols=min(len(list(dirs_dict.values())[0]), 7), fontsize=12, edgecolor='#555')
+    # plt.tight_layout(pad=1.15)
+    plt.subplots_adjust(left=0.05, right=0.97, top=0.86, wspace=0.17)
+    plt.savefig(save_name)
+    plt.close()
+    
+    
 def plot_training_curves_3subplots(
     dirs_dict: dict, 
     metric_name: str = 'ep_PE_mean',
@@ -274,7 +354,7 @@ def plot_training_curves_3subplots(
     save_name: str = "training_curves.png",
 ) -> None:
     """
-    Plot training curves for different grid sizes in a 2x2 subplot grid.
+    Plot training curves for different grid sizes in a 1x3 subplot grid.
 
     Args:
         dirs_dict (dict): Dictionary mapping grid sizes to their dirs dictionaries.
@@ -312,7 +392,6 @@ def plot_compare_algo():
             "Deep-Pack": "backup/compare/2DBpp-v1_deeppack_DDQN-h200-rC/metrics.csv",
             "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
             "Deep-Pack-truth": "backup/compare/2DBpp-v1_deeppack_mask_DDQN-h200-rC/metrics.csv",
- 
         }, 
         "20x20" : {
             "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
@@ -354,17 +433,14 @@ def plot_cnn_net():
         "10x10" : {
             "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
             "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
-            # "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
         }, 
         "20x20" : {
             "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
             "PaC": "backup/cnn_net/2DBpp-v2_PPO-h400-c02-n64-b32-R15-k1-rA/metrics.csv",
-            # "Zhao-2D-truth": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-T/metrics.csv",
         },
         "40x40" : {
             "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
             "PaC": "backup/cnn_net/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-k1-rA/metrics.csv",
-            # "Zhao-2D-truth": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-T/metrics.csv",
         },
     }
     
@@ -422,42 +498,83 @@ def plot_compare_diff_reward_func():
     )
 
 
-def plot_without_decoder():
-    without_decoder = {
+def plot_hybrid_net():
+    compare_hybrid_net = {
         "10x10" : {
             "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
+            "PaH":  "backup/hybrid_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-2_TF,64,4,256,0,1-k1-rA-T/metrics.csv"
         }, 
-        "20x20" : {
-            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-        },
-        "40x40" : {
-            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT-w/o decoder": "backup/without_decoder/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform1_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-        },
     }
     
-    plot_training_curves_3subplots(
-        without_decoder, 
+    plot_training_curves_1subplots(
+        compare_hybrid_net, 
         metric_name='ep_PE_mean',
         ylabel='Avg Packing Efficiency',
         window_size=100, 
-        legend_loc='lower right',
-        save_name="fig/Training Curves of Packing Efficiency for Without Transformer Decoder.png"
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Packing Efficiency for using Hybrid Network.png"
     )
     
-    plot_training_curves_3subplots(
-        without_decoder, 
+    plot_training_curves_1subplots(
+        compare_hybrid_net, 
         metric_name='loss',
         ylabel='Avg Total Loss',
         window_size=100, 
-        save_name="fig/Training Curves of Loss for Without Transformer Decoder.png"
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Loss for using Hybrid Network.png"
     )
 
 
-
-
+def plot_diff_constant_g_for_replacement_method():
+    diff_constant_g_for_replacement_method = {
+        "10x10" : {
+            "-7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-15": "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-30": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-50": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^2": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^3": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^4": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^5": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^6": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^8": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+        }, 
+        "20x20" : {
+            "-7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-15": "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-30": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-50": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^2": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^3": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^4": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^5": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^6": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            "-10^8": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+        }, 
+    }
+    
+    plot_training_curves_2subplots(
+        diff_constant_g_for_replacement_method, 
+        metric_name='ep_PE_mean',
+        ylabel='Avg Packing Efficiency',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Packing Efficiency for Different Constant g in Replacement Method.png"
+    )
+    
+    plot_training_curves_2subplots(
+        diff_constant_g_for_replacement_method, 
+        metric_name='loss',
+        ylabel='Avg Total Loss',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Training Curves of Loss for Different Constant g in Replacement Method.png"
+    )
+    
+    
 if __name__ == "__main__":
     # $ tensorboard --logdir backup
     if not os.path.exists("fig"):
@@ -478,6 +595,8 @@ if __name__ == "__main__":
     ''' Plot training curves for different reward functions '''
     plot_compare_diff_reward_func()
     
-    ''' Plot training curves for without decoder '''
-    plot_without_decoder()
-    
+    ''' Plot training curves for using hybrid network '''
+    plot_hybrid_net()
+
+    ''' Plot training curves for different constant g in replacement method '''
+    plot_diff_constant_g_for_replacement_method()
