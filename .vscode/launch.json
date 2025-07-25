@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug cnn_net 10x10",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--config_path",
+        "settings/cnn_net/v1_PPO-h200-c02-n64-b32-R15-k1-rA.yaml"
+      ]
+    },
+    {
+      "name": "Debug hybrid_net 10x10",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--config_path",
+        "settings/hybrid_net/v1_PPO-h200-c02-n64-b32-R15-hybrid1-1_TF,64,4,256,0,1-k1-rA-T.yaml"
+      ]
+    }
+  ]
+}
