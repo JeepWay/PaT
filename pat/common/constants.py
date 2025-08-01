@@ -1,6 +1,6 @@
 
-__all__ = ['BIN', 'MASK', 'PE']
+__all__ = ['BIN', 'MASK', 'SU']
 
 BIN = "bin"
 MASK = "mask"
-PE = "PE"
+SU = "SU"

@@ -29,7 +29,7 @@ from pat.common.dummy_vec_env import CustomDummyVecEnv
 def test(orig_config: Dict[str, Any], target_config: Dict[str, Any]):
     print(f"\n{'-' * 30} Start Testing {'-' * 30}\n")
     ep_rewards_list = []
-    ep_PEs_list = []
+    ep_SUs_list = []
     for i in range(target_config["n_eval_seeds"]):
         eval_env: CustomDummyVecEnv = make_vec_env(
             env_id=target_config["env_id"], 
@@ -46,24 +46,24 @@ def test(orig_config: Dict[str, Any], target_config: Dict[str, Any]):
             raise ValueError(f"Unsupported algorithm in {orig_config['test_dir']}")
        
         eval_env.rebuild_obs_buf(model.observation_space, model.action_space)
-        episode_rewards, _, episode_PEs = evaluate_policy(
+        episode_rewards, _, episode_SUs = evaluate_policy(
             model, eval_env, 
             n_eval_episodes=target_config["n_eval_episodes"], 
             deterministic=True,
             return_episode_rewards=True,
         )
         ep_rewards_list.extend(episode_rewards)
-        ep_PEs_list.extend(episode_PEs)
+        ep_SUs_list.extend(episode_SUs)
 
     mean_reward = np.mean(ep_rewards_list)
     std_reward = np.std(ep_rewards_list)
-    mean_PE = np.mean(ep_PEs_list)
-    std_PE = np.std(ep_PEs_list)
+    mean_SU = np.mean(ep_SUs_list)
+    std_SU = np.std(ep_SUs_list)
     print(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}")
-    print(f"mean_PE: {mean_PE:.3f} +/- {std_PE:.3f}")
+    print(f"mean_SU: {mean_SU:.3f} +/- {std_SU:.3f}")
     with open(os.path.join(target_config['test_dir'], f"eval_{target_config['n_eval_episodes']}_{target_config['n_eval_seeds']}.txt"), "w") as file:
         file.write(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}\n")
-        file.write(f"mean_PE: {mean_PE:.3f} +/- {std_PE:.3f}\n")
+        file.write(f"mean_SU: {mean_SU:.3f} +/- {std_SU:.3f}\n")
     print(f"\n{'-' * 30}   Complete Testing {'-' * 30}\n")
 
 

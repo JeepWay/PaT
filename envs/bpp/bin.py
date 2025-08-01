@@ -62,14 +62,14 @@ class Bin(object):
         """
         return copy.deepcopy(self.bin)
 
-    def get_bin_PE(self) -> float:
+    def get_bin_SU(self) -> float:
         """
-        Return the packing efficiency of the `bin`.
+        Return the space utilization of the `bin`.
         
         Returns
         -------
         out: float
-            The packing efficiency of the `bin`.
+            The space utilization of the `bin`.
         """
         return ((1-self.bin).sum()) / (self.bin_w * self.bin_h)
     

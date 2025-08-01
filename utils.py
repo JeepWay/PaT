@@ -17,11 +17,11 @@ def formatted_result(
 ) -> None: 
     """
     讀取目錄底下的所有子目錄，尋找指定的測試文件 test_filename，
-    並從中提取獎勵和 PE 的平均值和標準差。
+    並從中提取獎勵和空間使用率的平均值和標準差。
     """
     csv_columns = ['Dir_Name', 'Reward_Mean', 'Reward_Std', 
-                   'PE_Mean', 'PE_Std', 
-                   'PE_Percent_Mean', 'PE_Percent_Std']
+                   'SU_Mean', 'SU_Std', 
+                   'SU_Percent_Mean', 'SU_Percent_Std']
     
     with open(save_filename, "w+", newline="\n") as file_handler:
         writer = csv.writer(file_handler)
@@ -34,7 +34,7 @@ def formatted_result(
             
             if test_filename in filenames:
                 test_file_path = os.path.join(dirpath, test_filename)
-                reward_mean = reward_std = pe_mean = pe_std = pe_percent_mean = pe_percent_std = "N/A"
+                reward_mean = reward_std = su_mean = su_std = su_percent_mean = su_percent_std = "N/A"
                 
                 with open(test_file_path, 'r') as file:
                     for line in file:
@@ -45,13 +45,13 @@ def formatted_result(
                                 reward_std = round(std, 6)
                             except:
                                 pass
-                        elif 'PE' in line:
+                        elif 'SU' in line:
                             try:
                                 val, std = map(float, line.split(':')[-1].strip().split('+/-'))
-                                pe_mean = round(val, 6)
-                                pe_std = round(std, 6)
-                                pe_percent_mean = round(val * 100, 2)
-                                pe_percent_std = round(std * 100, 2)
+                                su_mean = round(val, 6)
+                                su_std = round(std, 6)
+                                su_percent_mean = round(val * 100, 2)
+                                su_percent_std = round(std * 100, 2)
                             except:
                                 pass
 
@@ -59,8 +59,8 @@ def formatted_result(
                 result = [
                     dir_name,
                     reward_mean, reward_std,
-                    pe_mean, pe_std,
-                    pe_percent_mean, pe_percent_std
+                    su_mean, su_std,
+                    su_percent_mean, su_percent_std
                 ]
                 writer.writerow(result)
     logging.info(f"Complete writing test results into {save_filename}.")
@@ -212,19 +212,19 @@ def update_yaml_files(root_dir: str) -> None:
                 yaml.dump(data, file, sort_keys=False)
 
 
-def plot_training_curve_pe(
+def plot_training_curve(
     ax: axes.Axes, 
     dirs: dict[str, str], 
-    metric_name: str = 'ep_PE_mean',
+    metric_name: str = 'ep_SU_mean',
     title: str = '10x10', 
     xlabel: str = 'Steps',
-    ylabel: str = 'Avg Packing Efficiency',
+    ylabel: str = 'Avg Space Utilization',
     plot_moving_average: bool = True, 
     plot_raw: bool = True,
     window_size: int = 100,
 ) -> None:
     """
-    Plot the training curve of packing efficiency from multiple metrics files, with option for raw or moving average.
+    Plot the training curve of space utilization from multiple metrics files, with option for raw or moving average.
 
     Args:
         ax: Matplotlib axis object to plot on.
@@ -247,14 +247,14 @@ def plot_training_curve_pe(
         df = df.dropna()
 
         timesteps = df['timesteps'].values
-        ep_pe_mean = df[metric_name].values
+        ep_su_mean = df[metric_name].values
 
         if plot_moving_average:
-            ep_pe_mean_ma = np.convolve(ep_pe_mean, np.ones(window_size)/window_size, mode='valid')
+            ep_su_mean_ma = np.convolve(ep_su_mean, np.ones(window_size)/window_size, mode='valid')
             timesteps_ma = timesteps[window_size-1:]
-            ax.plot(timesteps_ma, ep_pe_mean_ma, label=label, color=colors[idx], linewidth=1.5)        
+            ax.plot(timesteps_ma, ep_su_mean_ma, label=label, color=colors[idx], linewidth=1.5)        
         if plot_raw:
-            ax.plot(timesteps, ep_pe_mean, color=colors[idx], linewidth=1.5, alpha=0.17)
+            ax.plot(timesteps, ep_su_mean, color=colors[idx], linewidth=1.5, alpha=0.17)
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
@@ -264,9 +264,9 @@ def plot_training_curve_pe(
 
 def plot_training_curves_1subplots(
     dirs_dict: dict, 
-    metric_name: str = 'ep_PE_mean',
+    metric_name: str = 'ep_SU_mean',
     xlabel: str = 'Steps',
-    ylabel: str = 'Avg Packing Efficiency',
+    ylabel: str = 'Avg Space Utilization',
     plot_moving_average: bool = True, 
     plot_raw: bool = True,
     window_size: int = 100,
@@ -283,7 +283,7 @@ def plot_training_curves_1subplots(
     """
     fig, axs = plt.subplots(1, 1, figsize=(10, 6), sharex=False, sharey=False)
     bin_size, dirs = list(dirs_dict.items())[0]
-    plot_training_curve_pe(
+    plot_training_curve(
         axs, dirs, 
         metric_name=metric_name,
         title=str(bin_size),
@@ -302,9 +302,9 @@ def plot_training_curves_1subplots(
 
 def plot_training_curves_2subplots(
     dirs_dict: dict, 
-    metric_name: str = 'ep_PE_mean',
+    metric_name: str = 'ep_SU_mean',
     xlabel: str = 'Steps',
-    ylabel: str = 'Avg Packing Efficiency',
+    ylabel: str = 'Avg Space Utilization',
     plot_moving_average: bool = True, 
     plot_raw: bool = True,
     window_size: int = 100,
@@ -324,7 +324,7 @@ def plot_training_curves_2subplots(
 
     for ax, (bin_size, dirs) in zip(axs, dirs_dict.items()):
         if dirs:
-            plot_training_curve_pe(
+            plot_training_curve(
                 ax, dirs, 
                 metric_name=metric_name,
                 title=str(bin_size),
@@ -344,9 +344,9 @@ def plot_training_curves_2subplots(
     
 def plot_training_curves_3subplots(
     dirs_dict: dict, 
-    metric_name: str = 'ep_PE_mean',
+    metric_name: str = 'ep_SU_mean',
     xlabel: str = 'Steps',
-    ylabel: str = 'Avg Packing Efficiency',
+    ylabel: str = 'Avg Space Utilization',
     plot_moving_average: bool = True, 
     plot_raw: bool = True,
     window_size: int = 100,
@@ -366,7 +366,7 @@ def plot_training_curves_3subplots(
 
     for ax, (bin_size, dirs) in zip(axs, dirs_dict.items()):
         if dirs:
-            plot_training_curve_pe(
+            plot_training_curve(
                 ax, dirs, 
                 metric_name=metric_name,
                 title=str(bin_size),
@@ -411,11 +411,11 @@ def plot_compare_algo():
     
     plot_training_curves_3subplots(
         compare_algo, 
-        metric_name='ep_PE_mean',
-        ylabel='Avg Packing Efficiency',
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
-        save_name="fig/Training Curves of Packing Efficiency for Different Algorithms.png"
+        save_name="fig/Training Curves of Space Utilization for Different Algorithms.png"
     )
     
     plot_training_curves_3subplots(
@@ -446,11 +446,11 @@ def plot_cnn_net():
     
     plot_training_curves_3subplots(
         compare_cnn_net, 
-        metric_name='ep_PE_mean',
-        ylabel='Avg Packing Efficiency',
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
-        save_name="fig/Training Curves of Packing Efficiency for using CNN.png"
+        save_name="fig/Training Curves of Space Utilization for using CNN.png"
     )
     
     plot_training_curves_3subplots(
@@ -481,11 +481,11 @@ def plot_compare_diff_reward_func():
     
     plot_training_curves_3subplots(
         diff_reward_func, 
-        metric_name='ep_PE_mean',
-        ylabel='Avg Packing Efficiency',
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
-        save_name="fig/Training Curves of Packing Efficiency for Different Reward Functions.png"
+        save_name="fig/Training Curves of Space Utilization for Different Reward Functions.png"
     )
     
     plot_training_curves_3subplots(
@@ -509,11 +509,11 @@ def plot_hybrid_net():
     
     plot_training_curves_1subplots(
         compare_hybrid_net, 
-        metric_name='ep_PE_mean',
-        ylabel='Avg Packing Efficiency',
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
-        save_name="fig/Training Curves of Packing Efficiency for using Hybrid Network.png"
+        save_name="fig/Training Curves of Space Utilization for using Hybrid Network.png"
     )
     
     plot_training_curves_1subplots(
@@ -558,11 +558,11 @@ def plot_diff_constant_g_for_replacement_method():
     
     plot_training_curves_2subplots(
         diff_constant_g_for_replacement_method, 
-        metric_name='ep_PE_mean',
-        ylabel='Avg Packing Efficiency',
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
-        save_name="fig/Training Curves of Packing Efficiency for Different Constant g in Replacement Method.png"
+        save_name="fig/Training Curves of Space Utilization for Different Constant g in Replacement Method.png"
     )
     
     plot_training_curves_2subplots(

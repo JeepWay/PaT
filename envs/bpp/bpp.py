@@ -118,7 +118,7 @@ class BppEnv(gym.Env):
             self.items_creator._add_unit_item() # ensure next state is able to be observed
 
         truncated = False
-        info = {'bin': self._get_bin(), 'PE': self._get_bin_PE(), 'next_item': self._get_next_item(), 'mask': self._get_mask_obs()}
+        info = {'bin': self._get_bin(), 'SU': self._get_bin_SU(), 'next_item': self._get_next_item(), 'mask': self._get_mask_obs()}
         return self._get_obs(), reward, terminated, truncated, info
 
     def reset(
@@ -175,16 +175,16 @@ class BppEnv(gym.Env):
         """
         return self.bin.get_bin()
 
-    def _get_bin_PE(self) -> float:
+    def _get_bin_SU(self) -> float:
         """
-        Return the packing efficiency of the `bin`.
+        Return the space utilization of the `bin`.
         
         Returns
         -------
         out: float
-            The packing efficiency of the `bin`.
+            The space utilization of the `bin`.
         """
-        return self.bin.get_bin_PE()
+        return self.bin.get_bin_SU()
 
     def _get_next_item(self) -> Tuple[int, int]:
         """

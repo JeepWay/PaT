@@ -107,7 +107,7 @@ def step(env, action_width, action_height, cur_steps):
         step_btn = gr.Button("Step", visible=False)
         info_box = gr.Markdown(f"## Packing information \
                                         \n### You have used up all step of the current episode. \
-                                        \n### The packing efficiency of this run is  {info['PE']*100}%. \
+                                        \n### The space utilization of this episode is  {info['SU']*100}%. \
                                         \n### Please click the reset button to start the new episode.", visible=True)
     return new_observations, state, item_width, item_height, step_btn, info_box, cur_steps
 
