@@ -17,7 +17,7 @@ env_kwargs:
   reward_type: area
 monitor_kwargs:
   info_keywords: !!python/tuple
-  - PE
+  - SU
 policy_kwargs: &id001
   normalize_images: false
   network: TransfromerNetwork3
