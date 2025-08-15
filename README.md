@@ -38,6 +38,13 @@ pip install -r requirements.txt
 │   │   ├── creator.py     # Create requested items
 │   │   └── item.py        # Item class definition  
 │   └── register.py        # Environment registration 
+├── fig/                   # Store training curves files, ignored by git
+│   └── *.png              # Training curves PNG files, ignored by git
+├── logs/                  # Store training logs, model weights and so on, ignored by git
+│   └── ppo/               # Algorithm name, ignored by git
+│   │   ├── 2DBpp-v1_PPO-*/ # 10x10 environment, ignored by git
+│   │   ├── 2DBpp-v2_PPO-*/ # 20x20 environment, ignored by git 
+│   │   └── 2DBpp-v3_PPO-*/ # 40x40 environment, ignored by git
 ├── pat/                   # DRL agent implementation (PPO with Transformer)  
 │   ├── common/            # Custom Stable-Baselines3 (SB3) common utilities
 │   ├── ppo/               # PPO algorithm implementation (SB3)
