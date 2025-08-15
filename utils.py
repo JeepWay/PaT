@@ -383,34 +383,64 @@ def plot_training_curves_3subplots(
     plt.savefig(save_name)
     plt.close()
     
-
-def plot_compare_algo():
-    compare_algo = {
-        "10x10" : {
-            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "Zhao-2D": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-P/metrics.csv",
-            "Deep-Pack": "backup/compare/2DBpp-v1_deeppack_DDQN-h200-rC/metrics.csv",
-            "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
-            "Deep-Pack-truth": "backup/compare/2DBpp-v1_deeppack_mask_DDQN-h200-rC/metrics.csv",
-        }, 
-        "20x20" : {
-            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "Zhao-2D": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-P/metrics.csv",
-            "Deep-Pack": "backup/compare/2DBpp-v2_deeppack_DDQN-h400-rC/metrics.csv",
-            "Zhao-2D-truth": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-T/metrics.csv",
-            "Deep-Pack-truth": "backup/compare/2DBpp-v2_deeppack_mask_DDQN-h400-rC/metrics.csv",
-        },
-        "40x40" : {
-            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "Zhao-2D": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-P/metrics.csv",
-            "Deep-Pack": "backup/compare/2DBpp-v3_deeppack_DDQN-h1600-rC/metrics.csv",
-            "Zhao-2D-truth": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-T/metrics.csv",
-            "Deep-Pack-truth": "backup/compare/2DBpp-v3_deeppack_mask_DDQN-h1600-rC/metrics.csv",
-        },
-    }
     
+if __name__ == "__main__":
+    ''' Example usage of formatted_result '''
+    # formatted_result(root_dir='backup')
+    
+    ''' Example usage of updating YAML files according to filename '''
+    # update_yaml_files(root_dir='settings/main')
+        
+    '''
+    Plot Function Introduction
+    If you want to plot {X} environments, use the `plot_training_curves_{X}subplots` function.
+    `metrics.csv` stores the training metrics.
+    `dirs_dict` is a dictionary mapping bin sizes to algorithm names showing on figure, and each algorithm name is mapped to the path of its `metrics.csv` file.
+    `metric_name` specifies the metric in `metrics.csv` to plot.
+    `window_size` specifies the smoothing window size for the moving average.
+    '''
+    
+    os.makedirs("fig", exist_ok=True)
+    
+    # Example: Plot only one method and only one environment
+    plot_training_curves_1subplots(
+        dirs_dict={
+            "10x10" : {
+                "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            }, 
+        }, 
+        metric_name='ep_SU_mean',
+        ylabel='Avg Space Utilization',
+        window_size=100, 
+        legend_loc='upper center',
+        save_name="fig/Example of One Method and One Environment.png"
+    )
+    
+    # Plot Figure 10. Training Curves of Space Utilization for Different Algorithms
     plot_training_curves_3subplots(
-        compare_algo, 
+        dirs_dict={
+            "10x10" : {
+                "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "Zhao-2D": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-P/metrics.csv",
+                "Deep-Pack": "backup/compare/2DBpp-v1_deeppack_DDQN-h200-rC/metrics.csv",
+                "Zhao-2D-truth": "backup/compare/2DBpp-v1_zhao_ACKTR-h200-n64-M7-rA-T/metrics.csv",
+                "Deep-Pack-truth": "backup/compare/2DBpp-v1_deeppack_mask_DDQN-h200-rC/metrics.csv",
+            }, 
+            "20x20" : {
+                "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "Zhao-2D": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-P/metrics.csv",
+                "Deep-Pack": "backup/compare/2DBpp-v2_deeppack_DDQN-h400-rC/metrics.csv",
+                "Zhao-2D-truth": "backup/compare/2DBpp-v2_zhao_ACKTR-h400-n64-M7-rA-T/metrics.csv",
+                "Deep-Pack-truth": "backup/compare/2DBpp-v2_deeppack_mask_DDQN-h400-rC/metrics.csv",
+            },
+            "40x40" : {
+                "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "Zhao-2D": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-P/metrics.csv",
+                "Deep-Pack": "backup/compare/2DBpp-v3_deeppack_DDQN-h1600-rC/metrics.csv",
+                "Zhao-2D-truth": "backup/compare/2DBpp-v3_zhao_ACKTR-h1600-n64-M7-rA-T/metrics.csv",
+                "Deep-Pack-truth": "backup/compare/2DBpp-v3_deeppack_mask_DDQN-h1600-rC/metrics.csv",
+            },
+        }, 
         metric_name='ep_SU_mean',
         ylabel='Avg Space Utilization',
         window_size=100, 
@@ -418,34 +448,22 @@ def plot_compare_algo():
         save_name="fig/Training Curves of Space Utilization for Different Algorithms.png"
     )
     
+    # Plot Figure 11. Training Curves of Space Utilization for using CNN
     plot_training_curves_3subplots(
-        compare_algo, 
-        metric_name='loss',
-        ylabel='Avg Total Loss',
-        window_size=100, 
-        legend_loc='upper center',
-        save_name="fig/Training Curves of Loss for Different Algorithms.png"
-    )
-
-
-def plot_cnn_net():
-    compare_cnn_net = {
-        "10x10" : {
-            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
+        dirs_dict={
+            "10x10" : {
+                "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
+            }, 
+            "20x20" : {
+                "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaC": "backup/cnn_net/2DBpp-v2_PPO-h400-c02-n64-b32-R15-k1-rA/metrics.csv",
+            },
+            "40x40" : {
+                "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaC": "backup/cnn_net/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-k1-rA/metrics.csv",
+            },
         }, 
-        "20x20" : {
-            "PaT":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaC": "backup/cnn_net/2DBpp-v2_PPO-h400-c02-n64-b32-R15-k1-rA/metrics.csv",
-        },
-        "40x40" : {
-            "PaT":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaC": "backup/cnn_net/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-k1-rA/metrics.csv",
-        },
-    }
-    
-    plot_training_curves_3subplots(
-        compare_cnn_net, 
         metric_name='ep_SU_mean',
         ylabel='Avg Space Utilization',
         window_size=100, 
@@ -453,34 +471,22 @@ def plot_cnn_net():
         save_name="fig/Training Curves of Space Utilization for using CNN.png"
     )
     
+    # Plot Figure 12. Training Curves of Space Utilization for Different Reward Functions
     plot_training_curves_3subplots(
-        compare_cnn_net, 
-        metric_name='loss',
-        ylabel='Avg Total Loss',
-        window_size=100, 
-        legend_loc='upper center',
-        save_name="fig/Training Curves of Loss for using CNN.png"
-    )
-
-
-def plot_compare_diff_reward_func():
-    diff_reward_func = {
-        "10x10" : {
-            "PaT (area)":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+        dirs_dict={
+            "10x10" : {
+                "PaT (area)":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            }, 
+            "20x20" : {
+                "PaT (area)":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            },
+            "40x40" : {
+                "PaT (area)":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            },
         }, 
-        "20x20" : {
-            "PaT (area)":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
-        },
-        "40x40" : {
-            "PaT (area)":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
-        },
-    }
-    
-    plot_training_curves_3subplots(
-        diff_reward_func, 
         metric_name='ep_SU_mean',
         ylabel='Avg Space Utilization',
         window_size=100, 
@@ -488,27 +494,38 @@ def plot_compare_diff_reward_func():
         save_name="fig/Training Curves of Space Utilization for Different Reward Functions.png"
     )
     
+    # Plot Figure 13. Training Curves of Loss for Different Reward Functions
     plot_training_curves_3subplots(
-        diff_reward_func, 
+        dirs_dict={
+            "10x10" : {
+                "PaT (area)":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            }, 
+            "20x20" : {
+                "PaT (area)":  "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            },
+            "40x40" : {
+                "PaT (area)":  "backup/main/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaT (cluster size x compactness)": "backup/diff_reward_type/2DBpp-v3_PPO-h1600-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rC-T/metrics.csv",
+            },
+        }, 
         metric_name='loss',
         ylabel='Avg Total Loss',
         window_size=100, 
         legend_loc='upper center',
         save_name="fig/Training Curves of Loss for Different Reward Functions.png"
     )
-
-
-def plot_hybrid_net():
-    compare_hybrid_net = {
-        "10x10" : {
-            "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
-            "PaH":  "backup/hybrid_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-2_TF,64,4,256,0,1-k1-rA-T/metrics.csv"
-        }, 
-    }
     
+    # Plot Figure 15. Training Curves of Space Utilization for using Hybrid Network
     plot_training_curves_1subplots(
-        compare_hybrid_net, 
+        dirs_dict={
+            "10x10" : {
+                "PaT":  "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "PaC": "backup/cnn_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-k1-rA/metrics.csv",
+                "PaH":  "backup/hybrid_net/2DBpp-v1_PPO-h200-c02-n64-b32-R15-hybrid1-3-2_TF,64,4,256,0,1-k1-rA-T/metrics.csv"
+            }, 
+        }, 
         metric_name='ep_SU_mean',
         ylabel='Avg Space Utilization',
         window_size=100, 
@@ -516,87 +533,39 @@ def plot_hybrid_net():
         save_name="fig/Training Curves of Space Utilization for using Hybrid Network.png"
     )
     
-    plot_training_curves_1subplots(
-        compare_hybrid_net, 
-        metric_name='loss',
-        ylabel='Avg Total Loss',
-        window_size=100, 
-        legend_loc='upper center',
-        save_name="fig/Training Curves of Loss for using Hybrid Network.png"
-    )
-
-
-def plot_diff_constant_g_for_replacement_method():
-    diff_constant_g_for_replacement_method = {
-        "10x10" : {
-            "-7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-15": "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-30": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-50": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^2": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^3": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^4": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^5": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^6": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^8": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-        }, 
-        "20x20" : {
-            "-7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-15": "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-30": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-50": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^2": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^3": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^4": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^5": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^6": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-            "-10^8": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
-        }, 
-    }
-    
+    # Plot Figure 16. Training Curves of Space Utilization for Different Constant g in Replacement Method 
     plot_training_curves_2subplots(
-        diff_constant_g_for_replacement_method, 
+        dirs_dict={
+            "10x10" : {
+                "-7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-15": "backup/main/2DBpp-v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-30": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-50": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^2": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^3": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^4": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^5": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^6": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^7": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^8": "backup/mask_replace/2DBpp-v1_PPO-h200-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            }, 
+            "20x20" : {
+                "-7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-15": "backup/main/2DBpp-v2_PPO-h400-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-30": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R30-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-50": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R50-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^2": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-R100-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^3": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re3-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^4": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re4-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^5": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re5-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^6": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re6-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^7": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re7-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+                "-10^8": "backup/mask_replace/2DBpp-v2_PPO-h400-c02-n64-b32-Re8-transform3_TF,64,4,256,0,1-k1-rA-T/metrics.csv",
+            }, 
+        }, 
         metric_name='ep_SU_mean',
         ylabel='Avg Space Utilization',
         window_size=100, 
         legend_loc='upper center',
         save_name="fig/Training Curves of Space Utilization for Different Constant g in Replacement Method.png"
     )
-    
-    plot_training_curves_2subplots(
-        diff_constant_g_for_replacement_method, 
-        metric_name='loss',
-        ylabel='Avg Total Loss',
-        window_size=100, 
-        legend_loc='upper center',
-        save_name="fig/Training Curves of Loss for Different Constant g in Replacement Method.png"
-    )
-    
-    
-if __name__ == "__main__":
-    # $ tensorboard --logdir backup
-    if not os.path.exists("fig"):
-        os.makedirs("fig")
-    
-    ''' Example usage of formatted_result '''
-    # formatted_result(root_dir='backup')
-    
-    ''' Example usage of updating YAML files according to filename '''
-    # update_yaml_files(root_dir='settings/main')
-
-    ''' Plot training curves for different algorithms '''
-    plot_compare_algo()
-
-    ''' Plot training curves for using CNN network '''
-    plot_cnn_net()
-    
-    ''' Plot training curves for different reward functions '''
-    plot_compare_diff_reward_func()
-    
-    ''' Plot training curves for using hybrid network '''
-    plot_hybrid_net()
-
-    ''' Plot training curves for different constant g in replacement method '''
-    plot_diff_constant_g_for_replacement_method()
