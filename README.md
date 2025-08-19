@@ -11,7 +11,18 @@
 
 
 ## 2. Installation
-### Create new conda environment
+### 2.1 Clone this project
+```bash
+git clone https://github.com/JeepWay/PaT.git
+```
+After cloning, navigate to the project directory:
+```bash
+cd PaT
+```
+
+### 2.2 Create new conda environment
+If you want to create the new conda environment, you can execute the following commands.
+
 ```bash
 # only cpu
 bash scripts/install.sh -c 0
@@ -21,7 +32,19 @@ bash scripts/install.sh -c 11.8
 ```
 You may need to modify the path to your `conda.sh` file in the `install.sh` script, depending on where Miniconda or Anaconda is installed on your system.
 
-### Use existing conda environment
+After installing the conda environment, you need to activate it.
+
+```bash
+conda activate pat
+```
+
+### 2.2 Use existing conda environment
+If you want to use the existing conda environment, you can execute the following command.
+
+```bash
+conda activate <your-env-name>
+```
+
 ```bash
 # use cuda
 pip install -r requirements.txt
@@ -42,9 +65,9 @@ pip install -r requirements.txt
 │   └── *.png              # Training curves PNG files, ignored by git
 ├── logs/                  # Store training logs, model weights and so on, ignored by git
 │   └── ppo/               # Algorithm name, ignored by git
-│   │   ├── 2DBpp-v1_PPO-*/ # 10x10 environment, ignored by git
-│   │   ├── 2DBpp-v2_PPO-*/ # 20x20 environment, ignored by git 
-│   │   └── 2DBpp-v3_PPO-*/ # 40x40 environment, ignored by git
+│   │   ├── 2DBpp-v1_PPO-*/ # 10x10 environment, named according to .yaml, ignored by git
+│   │   ├── 2DBpp-v2_PPO-*/ # 20x20 environment, named according to .yaml, ignored by git 
+│   │   └── 2DBpp-v3_PPO-*/ # 40x40 environment, named according to .yaml, ignored by git
 ├── pat/                   # DRL agent implementation (PPO with Transformer)  
 │   ├── common/            # Custom Stable-Baselines3 (SB3) common utilities
 │   ├── ppo/               # PPO algorithm implementation (SB3)
@@ -55,9 +78,10 @@ pip install -r requirements.txt
 │   └── 2DBpp-v3_PPO-*/    # 40x40 environment
 ├── scripts/               # Installation and execution scripts  
 │   ├── install.sh         # Environment setup (CPU/GPU)  
-│   ├── all.sh             # Commands to run all experiments  
-│   ├── run_docker_cpu.sh  # Docker CPU deployment  
-│   └── run_docker_gpu.sh  # Docker GPU deployment  
+│   ├── all.sh             # Commands to run all experiments
+│   ├── build_docker.sh    # script to build Docker image, called by Makefile
+│   ├── run_docker_cpu.sh  # script to run Docker CPU image, called by Makefile  
+│   └── run_docker_gpu.sh  # script to run Docker GPU image, called by Makefile  
 ├── settings/              # YAML configuration files for experiments  
 │   ├── cnn_net/           # CNN-based network
 │   ├── diff_reward_type/  # Different reward function
@@ -67,7 +91,7 @@ pip install -r requirements.txt
 │   ├── mixed/             # Mixed-training
 │   ├── mask_replace/      # Grid search of replace method in action masking
 │   └── multi_layer/       # Multi-layer for Transformer  
-├── test_data/             # Requested item sequences in testing phase
+├── test_data/             # Requested item sequences in testing phase, use `get_test_data.py` to get it
 │   ├── 2DBpp-v1/          # 10x10 environment 
 │   ├── 2DBpp-v2/          # 20x20 environment 
 │   └── 2DBpp-v3/          # 40x40 environment
@@ -97,14 +121,22 @@ python main.py --config_path settings/main/v3_PPO-h1600-c02-n64-b32-R15-transfor
 
 For more examples, please refer to the [scripts/all.sh](scripts/all.sh) script, which contains the complete commands for all experiments in the thesis. 
 
-Each command corresponds to specific YAML configuration files in the settings/ directory, ensuring experimental reproducibility and systematic management.
+Each command corresponds to specific YAML configuration files in the [settings/](/settings/) directory, ensuring experimental reproducibility and systematic management.
 
-For more details about the configuration files, please refer to the [update_yaml_files](utils.py#L69) function in the utils.py file.
+For more details about the configuration files, please refer to the [update_yaml_files](utils.py#L69) function in the [utils.py](/utils.py) file. 
+
+You can copy a template from [settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml](settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml) and rename the copied file according to your experiment, and then use the [update_yaml_files](utils.py#L69) function to update the content in YAML file.
+
+Training and Testing are stored in `/logs/ppo/2DBpp-vX_PPO-*` folder, generated and named based on the filename of the given YAML configuration file.
+
+If you want to formatting testing results, you can run [formatted_result](utils.py#L13) function in the [utils.py](/utils.py) file. This function will extract testing results from `eval_50_20.txt` under each sub-folder to a single `csv` file.
+
+For the usage of plotting training figure, you can see the [example](utils.py#L406) in  [utils.py](/utils.py) file.
 
 ### 4.2 Choose training, testing mode, or both
 You can choose to run the training, testing, or both modes by adding the `--mode` flag into the command, you can also set it to `train` or `test`, or `both`. If you don't set the `--mode` flag, it will default to `both` mode.
 
-For example, if you want to run the testing mode, you can execute the following command:
+For example, if you want to run the testing phase after completing training phase, you can execute the following command:
 
 ```bash
 python main.py --mode test --config_path settings/main/v1_PPO-h200-c02-n64-b32-R15-transform3_TF,64,4,256,0,1-k1-rA-T.yaml
@@ -148,6 +180,8 @@ python UI.py
 There is also an online demo hosted on Hugging Face Spaces, running on a free CPU. You can try it out [here](https://huggingface.co/spaces/JeepWay/PaT_2D_Bin_Packing_Environment).
 
 ## 5. Use docker images (Optional)
+For more detail of `make` command, please refer to the [Makefile](Makefile).
+
 ### Build docker image
 Build CPU image:
 ```bash
