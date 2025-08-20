@@ -35,7 +35,7 @@ You may need to modify the path to your `conda.sh` file in the `install.sh` scri
 After installing the conda environment, you need to activate it.
 
 ```bash
-conda activate pat
+conda activate PaT
 ```
 
 ### 2.2 Use existing conda environment
